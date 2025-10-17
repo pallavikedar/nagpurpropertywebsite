@@ -1,18 +1,19 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { Bath, Bed, Heart, MapPin, Move, Tag } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { BASE_URL } from "@/app/baseurl"
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Bath, Bed, Heart, MapPin, Move, Tag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { BASE_URL } from "@/app/baseurl";
+
 interface Property {
   id: string;
   title: string;
   address: string;
-  image: string;
+  images?: string[];
   type: "rent" | "sale";
   price: number;
   bedrooms: number;
@@ -20,6 +21,7 @@ interface Property {
   area: number;
   ownerName: string;
 }
+
 export default function PropertyCard() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [error, setError] = useState("");
@@ -29,14 +31,14 @@ export default function PropertyCard() {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
+        // 🔹 First, check localStorage for cached data
+        const cachedData = localStorage.getItem("properties");
+        if (cachedData) {
+          setProperties(JSON.parse(cachedData));
+          setLoading(false);
+        }
+
         const token = localStorage.getItem("usertoken");
-
-        // if (!token) {
-       
-        //   window.location.href = "/Login";
-        //   return;
-        // }
-
         const response = await fetch(`${BASE_URL}/properties`, {
           method: "GET",
           headers: {
@@ -49,7 +51,12 @@ export default function PropertyCard() {
         }
 
         const data = await response.json();
+
+        // 🔹 Save data to state
         setProperties(data);
+
+        // 🔹 Save fetched data to localStorage
+        localStorage.setItem("properties", JSON.stringify(data));
       } catch (err: any) {
         setError(err.message || "Something went wrong. Please try again.");
       } finally {
@@ -75,8 +82,12 @@ export default function PropertyCard() {
             style={{ animationDelay }}
           >
             <div className="relative aspect-video overflow-hidden">
-            <Image
-                src={property.images && property.images.length > 0 ? property.images[0] : "/placeholder.svg"}
+              <Image
+                src={
+                  property.images && property.images.length > 0
+                    ? property.images[0]
+                    : "/placeholder.svg"
+                }
                 alt={property.title}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -85,10 +96,12 @@ export default function PropertyCard() {
               <Badge
                 className={cn(
                   "absolute top-3 left-3",
-                  property.type === "rent" ? "bg-secondary text-secondary-foreground" : "bg-primary"
+                  property.type === "rent"
+                    ? "bg-secondary text-secondary-foreground"
+                    : "bg-primary"
                 )}
               >
-                {property.type === "rent" ? "For Rent" : "For Sale"}
+                {property.type === "rent" ? "For Rent" : "For Sell"}
               </Badge>
               <button
                 className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/90 flex items-center justify-center transition-colors hover:bg-white"
@@ -98,7 +111,10 @@ export default function PropertyCard() {
                 }}
               >
                 <Heart
-                  className={cn("h-4 w-4 transition-colors", isFavorite ? "fill-red-500 text-red-500" : "text-gray-600")}
+                  className={cn(
+                    "h-4 w-4 transition-colors",
+                    isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"
+                  )}
                 />
                 <span className="sr-only">Add to favorites</span>
               </button>
@@ -140,7 +156,9 @@ export default function PropertyCard() {
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Listed by {property.ownerName}</span>
+                {/* <span className="text-sm text-muted-foreground">
+                  Listed by {property.ownerName}
+                </span> */}
                 <Link href={`/properties/${property.id}`}>
                   <Button size="sm" className="transition-all duration-300 hover:scale-105">
                     View Details

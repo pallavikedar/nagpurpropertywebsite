@@ -121,7 +121,7 @@
 //   )
 // }
 
-"use client"; // Mark this file as a client component
+"use client"; 
 
 import { useState } from "react";
 import { Search } from "lucide-react";
@@ -157,7 +157,7 @@ export default function HeroSection() {
             </p>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-lg max-w-4xl animate-fade-up animate-once animate-duration-[800ms] animate-delay-300">
+          {/* <div className="bg-white rounded-lg p-4 shadow-lg max-w-4xl animate-fade-up animate-once animate-duration-[800ms] animate-delay-300">
             <Tabs defaultValue="buy" onValueChange={setSearchTab}>
               <TabsList className="grid grid-cols-3 mb-4">
                 <TabsTrigger value="buy">{t.Buy}</TabsTrigger>
@@ -235,7 +235,7 @@ export default function HeroSection() {
                 </div>
               </TabsContent>
             </Tabs>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

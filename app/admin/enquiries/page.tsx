@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Building, Home, LayoutDashboard, ListFilter, LogOut, Plus, Settings, Users } from "lucide-react";
+import { Building, Handshake, Home, LayoutDashboard, ListFilter, LogOut, Plus, Settings, Users } from "lucide-react";
 import { BASE_URL } from "@/app/baseurl";
 import Router from "next/router";
 
@@ -101,12 +101,12 @@ const EnquiryTable: React.FC = () => {
             <span>Enquiries</span>
           </Link>
           <Link
-            href="/admin/settings"
-            className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-          >
-            <Settings className="h-5 w-5" />
-            <span>Settings</span>
-          </Link>
+              href="/admin/enquiries"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            >
+              <Handshake  className="h-5 w-5" />
+              <span>Legal Consultancy Enquiry</span>
+            </Link>
           <Link
             href="/admin/getusers"
             className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
@@ -127,7 +127,7 @@ const EnquiryTable: React.FC = () => {
       </div>
 
       <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Enquiry List</h1>
-      <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
+      <div className="overflow-x-auto bg-white rounded-lg shadow-lg" style={{marginLeft:"280px"}}>
         <table className="min-w-full text-sm text-gray-700">
           <thead className="bg-blue-600 text-white">
             <tr>

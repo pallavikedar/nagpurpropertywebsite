@@ -755,6 +755,7 @@ export default function AddPropertyPage() {
   const [images, setImages] = useState<File[]>([]); // State to store selected images
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+    const [loading, setLoading] = useState(false); // Loader state
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -794,6 +795,7 @@ export default function AddPropertyPage() {
     e.preventDefault();
     setError("");
     setSuccess("");
+      setLoading(true); // Start loader
 
     try {
       const userToken = localStorage.getItem("usertoken");
@@ -842,7 +844,8 @@ export default function AddPropertyPage() {
         },
         body: formDataToSend,
       });
-
+      alert("Property submitted successfully!");
+      setLoading(false); // Stop loader
       if (!response.ok) {
         const contentType = response.headers.get("content-type");
         let errorMessage = "Failed to submit property.";
@@ -859,6 +862,7 @@ export default function AddPropertyPage() {
               errorMessage = "Access denied. You are not authorized.";
             }
           }
+           // Alert on success
         } catch (err) {
           console.error("Error reading response body:", err);
         }
@@ -902,6 +906,7 @@ export default function AddPropertyPage() {
       <main className="flex-1">
         <section className="bg-muted py-12">
           <div className="container px-4 md:px-6">
+          
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-3xl font-bold tracking-tight mb-2">{t.AddYourProperty}</h1>
               <p className="text-muted-foreground">{t.ListyourpropertyforsaleorrentonNagpurProperties}</p>
@@ -1194,8 +1199,8 @@ export default function AddPropertyPage() {
                 {error && <p className="text-red-500">{error}</p>}
                 {success && <p className="text-green-500">{success}</p>}
 
-                <Button type="submit" size="lg" className="mt-4">
-                 {t.SubmitProperty}
+               <Button type="submit" size="lg" className="mt-4 w-full">
+                  {loading ? "Submitting..." : t.SubmitProperty}
                 </Button>
               </form>
             </div>

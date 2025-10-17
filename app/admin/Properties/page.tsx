@@ -5,7 +5,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { BASE_URL } from "@/app/baseurl";
 import Link from "next/link";
-import { Building, Home, LayoutDashboard, ListFilter, LogOut, Plus, Settings, Users } from "lucide-react"
+import { Building, Home, LayoutDashboard, ListFilter, LogOut, Plus, Settings, Users,Handshake  } from "lucide-react"
 export default function AdminPropertiesPage() {
   const [properties, setProperties] = useState([]);
   const [error, setError] = useState("");
@@ -131,13 +131,14 @@ export default function AdminPropertiesPage() {
               <Users className="h-5 w-5" />
               <span>Enquiries</span>
             </Link>
-            <Link
-              href="/admin/settings"
+             <Link
+              href="/admin/enquiries"
               className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
-              <Settings className="h-5 w-5" />
-              <span>Settings</span>
+              <Handshake  className="h-5 w-5" />
+              <span>Legal Consultancy Enquiry</span>
             </Link>
+           
             <Link
               href="/admin/getusers"
               className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
@@ -172,7 +173,7 @@ export default function AdminPropertiesPage() {
             <span className="sr-only">Logout</span>
           </button>
         </div>
-      <main className="flex-1">
+      <main className="flex-1" style={{marginLeft:"280px"}}>
         <section className="py-12">
           <div className="container px-4 md:px-6">
             <h1 className="text-3xl font-bold tracking-tight mb-6 text-center">

@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label"
 
 import { useState,useEffect } from "react"
 import Link from "next/link"
-import { Building, Home, LayoutDashboard, ListFilter, LogOut, Plus, Settings, Users } from "lucide-react"
+import { Building, Home, LayoutDashboard, ListFilter, LogOut, Plus, Settings, Users, Handshake  } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -73,11 +73,11 @@ if (!isLoggedIn) {
               <span>Enquiries</span>
             </Link>
             <Link
-              href="/admin/settings"
+              href="/admin/enquiries"
               className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
-              <Settings className="h-5 w-5" />
-              <span>Settings</span>
+              <Handshake  className="h-5 w-5" />
+              <span>Legal Consultancy Enquiry</span>
             </Link>
             <Link
               href="/admin/getusers"
@@ -131,7 +131,7 @@ if (!isLoggedIn) {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Total Properties</p>
-                    <h3 className="text-2xl font-bold">{properties.length}</h3>
+                    {/* <h3 className="text-2xl font-bold">{properties.length}</h3> */}
                   </div>
                 </div>
               </div>
@@ -143,7 +143,7 @@ if (!isLoggedIn) {
                   </div>
                   <div>
                     <p className="text-muted-foreground">For Sale</p>
-                    <h3 className="text-2xl font-bold">{properties.filter((p) => p.type === "buy").length}</h3>
+                    {/* <h3 className="text-2xl font-bold">{properties.filter((p) => p.type === "buy").length}</h3> */}
                   </div>
                 </div>
               </div>
@@ -155,7 +155,7 @@ if (!isLoggedIn) {
                   </div>
                   <div>
                     <p className="text-muted-foreground">For Rent</p>
-                    <h3 className="text-2xl font-bold">{properties.filter((p) => p.type === "rent").length}</h3>
+                    {/* <h3 className="text-2xl font-bold">{properties.filter((p) => p.type === "rent").length}</h3> */}
                   </div>
                 </div>
               </div>
@@ -190,7 +190,7 @@ if (!isLoggedIn) {
 
                 <TabsContent value="properties">
                   <div className="space-y-4">
-                    {properties.slice(0, 5).map((property) => (
+                    {/* {properties.slice(0, 5).map((property) => (
                       <div key={property.id} className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex items-center space-x-4">
                           <div className="h-12 w-12 bg-muted rounded-md flex-shrink-0"></div>
@@ -208,7 +208,7 @@ if (!isLoggedIn) {
                           </Button>
                         </div>
                       </div>
-                    ))}
+                    ))} */}
                   </div>
                 </TabsContent>
 
