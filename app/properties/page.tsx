@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Bath, Bed, MapPin, Move, Tag, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,15 +120,27 @@ function PropertiesDashboard() {
 
       <main className="flex-1">
         {/* Header */}
-        <section className="bg-muted py-12">
+        <section style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?q=80&w=1073&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}  className="bg-muted py-12">
           <div className="container px-4 md:px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">{t.Properties ?? "Properties"}</h1>
-              <p className="text-muted-foreground">
-                {t.Browseourlistingstofindyourperfectproperty ??
+             <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative text-center px-4"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold mb-3 text-black-100">
+           {t.Properties ?? "Properties"}
+          </h1>
+          <p className="text-lg text-black-200">
+            {t.Browseourlistingstofindyourperfectproperty ??
                   "Browse our listings to find your perfect property"}
-              </p>
-            </div>
+          </p>
+          </motion.div>
+            
 
             <div className="flex items-center gap-2 w-full md:w-auto">
               <Input
