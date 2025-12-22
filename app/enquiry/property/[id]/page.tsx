@@ -355,10 +355,9 @@
 // }
 
 
-
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -382,11 +381,17 @@ interface Property {
 export default function PropertyEnquiryPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  // ✅ unwrap params safely for Next.js 15+
-  const { id: propertyId } = use(params);
-const token = localStorage.getItem("usertoken");
+  // ✅ SAFE PARAM ACCESS (Vercel compatible)
+  const propertyId = params.id;
+
+  // ✅ SAFE localStorage access
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("usertoken")
+      : null;
+
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -399,18 +404,19 @@ const token = localStorage.getItem("usertoken");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // ✅ Fetch single property by ID
+  // ✅ Fetch property
   useEffect(() => {
     if (!propertyId) return;
 
     const fetchPropertyById = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("usertoken");
+
         const res = await fetch(`${BASE_URL}/property/${propertyId}`, {
           headers: {
             Authorization: token ? `Bearer ${token}` : "",
           },
+          cache: "no-store", // ✅ prevents stale data on Vercel
         });
 
         if (!res.ok) throw new Error("Failed to fetch property details.");
@@ -418,7 +424,7 @@ const token = localStorage.getItem("usertoken");
         const data = await res.json();
         setProperty(data);
       } catch (err: any) {
-        console.error("Error fetching property:", err);
+        console.error(err);
         setError(err.message || "Something went wrong.");
       } finally {
         setLoading(false);
@@ -426,9 +432,9 @@ const token = localStorage.getItem("usertoken");
     };
 
     fetchPropertyById();
-  }, [propertyId]);
+  }, [propertyId, token]);
 
-  // ✅ Handle form change
+  // ✅ Form change
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -436,7 +442,7 @@ const token = localStorage.getItem("usertoken");
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  // ✅ Handle submit
+  // ✅ Submit enquiry
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -452,7 +458,7 @@ const token = localStorage.getItem("usertoken");
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-           Authorization: `Bearer ${token}`,
+          Authorization: token ? `Bearer ${token}` : "",
         },
         body: JSON.stringify({
           ...formData,
@@ -475,20 +481,22 @@ const token = localStorage.getItem("usertoken");
     }
   };
 
-  // 🌀 Loading state
+  // 🌀 Loading
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
-          <p className="text-lg text-muted-foreground">Loading property details...</p>
+          <p className="text-lg text-muted-foreground">
+            Loading property details...
+          </p>
         </main>
         <Footer />
       </div>
     );
   }
 
-  // ❌ Error state
+  // ❌ Error
   if (error) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -501,7 +509,7 @@ const token = localStorage.getItem("usertoken");
     );
   }
 
-  // ❌ Not found
+  // ❌ Property missing
   if (!property) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -514,7 +522,7 @@ const token = localStorage.getItem("usertoken");
     );
   }
 
-  // ✅ Render Page
+  // ✅ Render
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -534,12 +542,14 @@ const token = localStorage.getItem("usertoken");
                 Properties
               </Link>
               <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
-              <span className="font-medium truncate">{property.title}</span>
+              <span className="font-medium truncate">
+                {property.title}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Enquiry Section */}
+        {/* Enquiry */}
         <section className="py-12">
           <div className="container px-4 md:px-6">
             <div className="max-w-3xl mx-auto">
@@ -565,7 +575,6 @@ const token = localStorage.getItem("usertoken");
                     <Label htmlFor="fullName">Full Name</Label>
                     <Input
                       id="fullName"
-                      placeholder="Enter your full name"
                       value={formData.fullName}
                       onChange={handleChange}
                       required
@@ -577,7 +586,6 @@ const token = localStorage.getItem("usertoken");
                     <Input
                       id="email"
                       type="email"
-                      placeholder="Enter your email"
                       value={formData.email}
                       onChange={handleChange}
                       required
@@ -588,7 +596,6 @@ const token = localStorage.getItem("usertoken");
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input
                       id="phone"
-                      placeholder="Enter your phone number"
                       value={formData.phone}
                       onChange={handleChange}
                       required
@@ -599,7 +606,6 @@ const token = localStorage.getItem("usertoken");
                     <Label htmlFor="message">Your Message</Label>
                     <Textarea
                       id="message"
-                      placeholder="I'm interested in this property and would like to know more about..."
                       rows={4}
                       value={formData.message}
                       onChange={handleChange}
