@@ -67,8 +67,8 @@ function PropertiesDashboard() {
         if (cached) setProperties(JSON.parse(cached));
 
         const token = localStorage.getItem("usertoken");
-        const res = await fetch(`${BASE_URL}/properties`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const res = await fetch(`${BASE_URL}/properties/accepted`, {
+          // headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!res.ok) throw new Error("Failed to fetch properties");

@@ -39,11 +39,11 @@ export default function PropertyCard() {
         }
 
         const token = localStorage.getItem("usertoken");
-        const response = await fetch(`${BASE_URL}/properties`, {
+        const response = await fetch(`${BASE_URL}/properties/accepted`, {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          // },
         });
 
         if (!response.ok) {
