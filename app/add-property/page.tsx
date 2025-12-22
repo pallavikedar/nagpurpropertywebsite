@@ -713,12 +713,16 @@
 //   )
 // }
 
+
+
+
 "use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navbar from "@/components/navbar";
@@ -904,18 +908,34 @@ export default function AddPropertyPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <section className="bg-muted py-12">
-          <div className="container px-4 md:px-6">
-          
-            <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-3xl font-bold tracking-tight mb-2">{t.AddYourProperty}</h1>
-              <p className="text-muted-foreground">{t.ListyourpropertyforsaleorrentonNagpurProperties}</p>
-            </div>
-          </div>
-        </section>
+         <section
+        className="relative h-[45vh] flex items-center justify-center text-white"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1460472178825-e5240623afd5')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/50" />
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative text-center px-4"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold mb-3">
+            {t.AddYourProperty}
+          </h1>
+          <p className="text-lg text-gray-200">
+            {t.ListyourpropertyforsaleorrentonNagpurProperties}
+          </p>
+        </motion.div>
+      </section>
 
         <section className="py-12">
           <div className="container px-4 md:px-6">
+            
             <div className="max-w-3xl mx-auto">
               <form className="space-y-8" onSubmit={handleSubmit}>
                 {/* Basic Information */}
