@@ -14,6 +14,7 @@ Profile: "प्रोफ़ाइल",
 MyProperties: "मेरी प्रॉपर्टीज़",
 Logout: "लॉग आउट",
 Login: "लॉग इन",
+ Backto:"वापस जाएँ",
   // hero-section
 FindYourDreamPropertyinNagpur: "नागपुर में अपना ड्रीम प्रॉपर्टी पाएं",
 DiscovertheperfectpropertyforyourneedswithNagpursmosttrustedrealestatepartner: "अपनी ज़रूरतों के लिए परफेक्ट प्रॉपर्टी नागपुर के सबसे भरोसेमंद रियल एस्टेट पार्टनर के साथ खोजें",

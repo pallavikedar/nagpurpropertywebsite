@@ -14,6 +14,7 @@ Profile: "प्रोफाइल",
 MyProperties: "माझ्या प्रॉपर्टीज",
 Logout: "लॉगआउट",
 Login: "लॉगइन",
+ Backto:"परत जा",
 
 // hero-section
 FindYourDreamPropertyinNagpur: "नागपूरमध्ये आपली स्वप्नातील मालमत्ता शोधा",

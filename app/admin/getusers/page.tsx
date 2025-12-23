@@ -124,47 +124,56 @@ const handleclick = () => {
         </div>
 
         {/* Mobile Header */}
-        <div className="md:hidden fixed top-0 inset-x-0 h-16 bg-white border-b z-10 flex items-center justify-between px-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              NP Admin
-            </span>
-          </Link>
-          <button
-            className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            onClick={handleclick}
-          >
-            <LogOut className="h-5 w-5" />
-            <span className="sr-only">Logout</span>
-          </button>
-        </div>
+        <main className="md:ml-64 px-4 md:px-8 py-8">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Users
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          View all registered users
+        </p>
+      </div>
 
-      {/* Table Format */}
-      <div style={{marginLeft:"280px"}}>
-        <h2 className="text-xl font-semibold mb-2">User Details</h2>
-        <table className="table-auto w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-4 py-2">ID</th>
-              <th className="border border-gray-300 px-4 py-2">Name</th>
-              <th className="border border-gray-300 px-4 py-2">Email</th>
-              <th className="border border-gray-300 px-4 py-2">Phone</th>
-              {/* <th className="border border-gray-300 px-4 py-2">Role</th> */}
+      {/* USERS TABLE CARD */}
+      <div className="bg-white rounded-xl shadow-sm border overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+            <tr>
+              {/* <th className="px-6 py-4 text-left">ID</th> */}
+              <th className="px-6 py-4 text-left">Name</th>
+              <th className="px-6 py-4 text-left">Email</th>
+              <th className="px-6 py-4 text-left">Phone</th>
             </tr>
           </thead>
-          <tbody>
+
+          <tbody className="divide-y">
             {users.map((user) => (
-              <tr key={user.id}>
-                <td className="border border-gray-300 px-4 py-2">{user.id}</td>
-                <td className="border border-gray-300 px-4 py-2">{user.name}</td>
-                <td className="border border-gray-300 px-4 py-2">{user.email}</td>
-                <td className="border border-gray-300 px-4 py-2">{user.phone}</td>
-                {/* <td className="border border-gray-300 px-4 py-2">{user.role}</td> */}
+              <tr
+                key={user.id}
+                className="hover:bg-gray-50 transition"
+              >
+                {/* <td className="px-6 py-4 text-gray-700">
+                  #{user.id}
+                </td> */}
+
+                <td className="px-6 py-4 font-medium text-gray-800">
+                  {user.name}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {user.email}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {user.phone}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </main>
+  </div>
   );
 }

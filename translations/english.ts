@@ -13,6 +13,9 @@ export const englishTranslations = {
   MyProperties: "My Properties",
   Logout: "Logout",
   Login: "Login",
+  Backto:"Back to",
+ 
+ 
 
   // hero-section
   FindYourDreamPropertyinNagpur: "Find Your Dream Property in Nagpur",

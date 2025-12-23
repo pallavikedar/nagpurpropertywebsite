@@ -367,7 +367,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { BASE_URL } from "@/app/baseurl";
-
+import { useRouter } from "next/navigation";
 interface Property {
   id: string;
   title: string;
@@ -383,6 +383,7 @@ export default function PropertyEnquiryPage({
 }: {
   params: { id: string };
 }) {
+    const router = useRouter();
   // ✅ SAFE PARAM ACCESS (Vercel compatible)
   const propertyId = params.id;
 
@@ -444,6 +445,9 @@ export default function PropertyEnquiryPage({
 
   // ✅ Submit enquiry
   const handleSubmit = async (e: React.FormEvent) => {
+    if(!token){
+      router.push("/Login");
+    }
     e.preventDefault();
     setError("");
     setSuccess("");

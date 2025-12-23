@@ -126,34 +126,69 @@ const EnquiryTable: React.FC = () => {
         </div>
       </div>
 
-      <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Enquiry List</h1>
-      <div className="overflow-x-auto bg-white rounded-lg shadow-lg" style={{marginLeft:"280px"}}>
-        <table className="min-w-full text-sm text-gray-700">
-          <thead className="bg-blue-600 text-white">
+       <main className="md:ml-64 px-4 md:px-8 py-8">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Legal Consultancy Enquiries
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          View and manage legal service enquiries
+        </p>
+      </div>
+
+      {/* TABLE CARD */}
+      <div className="bg-white rounded-xl shadow-sm border overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
             <tr>
-              <th className="px-6 py-3 text-left font-semibold">ID</th>
-              <th className="px-6 py-3 text-left font-semibold">Full Name</th>
-              <th className="px-6 py-3 text-left font-semibold">Email</th>
-              <th className="px-6 py-3 text-left font-semibold">Phone</th>
-              <th className="px-6 py-3 text-left font-semibold">Required Service</th>
-              <th className="px-6 py-3 text-left font-semibold">Message</th>
+              {/* <th className="px-6 py-4 text-left">ID</th> */}
+              <th className="px-6 py-4 text-left">Name</th>
+              <th className="px-6 py-4 text-left">Email</th>
+              <th className="px-6 py-4 text-left">Phone</th>
+              <th className="px-6 py-4 text-left">Service</th>
+              <th className="px-6 py-4 text-left">Message</th>
             </tr>
           </thead>
-          <tbody>
+
+          <tbody className="divide-y">
             {enquiries.map((enquiry) => (
-              <tr key={enquiry.id} className="border-b hover:bg-gray-100 transition">
-                <td className="px-6 py-4">{enquiry.id}</td>
-                <td className="px-6 py-4">{enquiry.fullname}</td>
-                <td className="px-6 py-4">{enquiry.email}</td>
-                <td className="px-6 py-4">{enquiry.phone}</td>
-                <td className="px-6 py-4">{enquiry.requredService}</td>
-                <td className="px-6 py-4">{enquiry.message}</td>
+              <tr
+                key={enquiry.id}
+                className="hover:bg-gray-50 transition"
+              >
+                {/* <td className="px-6 py-4 text-gray-700">
+                  #{enquiry.id}
+                </td> */}
+
+                <td className="px-6 py-4 font-medium text-gray-800">
+                  {enquiry.fullname}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {enquiry.email}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {enquiry.phone}
+                </td>
+
+                <td className="px-6 py-4">
+                  <span className="inline-flex px-3 py-1 rounded-full text-xs bg-blue-50 text-blue-700 font-medium">
+                    {enquiry.requredService}
+                  </span>
+                </td>
+
+                <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
+                  {enquiry.message}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </main>
+  </div>
   );
 };
 

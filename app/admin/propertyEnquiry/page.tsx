@@ -194,35 +194,65 @@ export default function PropertyEnquiryPage() {
 
 
       
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Property Enquiries</h1>
+       <main className="md:ml-64 px-4 md:px-8 py-8">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Property Enquiries
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          View customer enquiries and property details
+        </p>
+      </div>
 
-      {/* Enquiries Table */}
-      <div className="overflow-x-auto shadow-md rounded-lg mb-8"  style={{marginLeft:"280px"}}>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-100">
+      {/* TABLE CARD */}
+      <div className="bg-white rounded-xl shadow-sm border overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
             <tr>
-              <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Full Name</th>
-              <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Email</th>
-              <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Phone</th>
-              <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Message</th>
-              <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Visit Date</th>
-              <th className="px-4 py-2 text-center text-sm font-semibold text-gray-700">Action</th>
+              <th className="px-6 py-4 text-left">Name</th>
+              <th className="px-6 py-4 text-left">Email</th>
+              <th className="px-6 py-4 text-left">Phone</th>
+              <th className="px-6 py-4 text-left">Message</th>
+              <th className="px-6 py-4 text-left">Visit Date</th>
+              <th className="px-6 py-4 text-center">Action</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+
+          <tbody className="divide-y">
             {enquiries.map((enquiry, index) => (
-              <tr key={index}>
-                <td className="px-4 py-2">{enquiry.fullName}</td>
-                <td className="px-4 py-2">{enquiry.email}</td>
-                <td className="px-4 py-2">{enquiry.phone}</td>
-                <td className="px-4 py-2">{enquiry.message}</td>
-                <td className="px-4 py-2">{enquiry.visitDate}</td>
-                <td className="px-4 py-2 text-center">
+              <tr
+                key={index}
+                className="hover:bg-gray-50 transition"
+              >
+                <td className="px-6 py-4 font-medium text-gray-800">
+                  {enquiry.fullName}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {enquiry.email}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {enquiry.phone}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
+                  {enquiry.message}
+                </td>
+
+                <td className="px-6 py-4 text-gray-600">
+                  {enquiry.visitDate}
+                </td>
+
+                <td className="px-6 py-4 text-center">
                   <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                    onClick={() => handleShowProperty(enquiry.propertyId)}
+                    onClick={() =>
+                      handleShowProperty(enquiry.propertyId)
+                    }
+                    className="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition"
                   >
-                    Show Property
+                    View Property
                   </button>
                 </td>
               </tr>
@@ -230,58 +260,78 @@ export default function PropertyEnquiryPage() {
           </tbody>
         </table>
       </div>
+    </main>
 
-      {/* Modal */}
-      {selectedProperty && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white w-full max-w-4xl rounded-lg shadow-lg overflow-y-auto max-h-[90vh] relative">
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
-            >
-              &times;
-            </button>
-            <div className="p-6">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">{selectedProperty.title}</h2>
-              <p className="text-gray-700 mb-4">{selectedProperty.description}</p>
+    {/* PROPERTY MODAL */}
+    {selectedProperty && (
+      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto relative">
+          {/* Close */}
+          <button
+            onClick={closeModal}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl"
+          >
+            ×
+          </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <p><strong>Property For:</strong> {selectedProperty.propertyFor}</p>
-                  <p><strong>Type:</strong> {selectedProperty.propertyType}</p>
-                  <p><strong>Price:</strong> ₹{selectedProperty.price.toLocaleString()}</p>
-                  <p><strong>Area:</strong> {selectedProperty.area} sq. ft.</p>
-                </div>
-                <div>
-                  <p><strong>Bedrooms:</strong> {selectedProperty.bedrooms}</p>
-                  <p><strong>Bathrooms:</strong> {selectedProperty.bathrooms}</p>
-                  <p><strong>Furnishing:</strong> {selectedProperty.furnishing}</p>
-                  <p><strong>Status:</strong> {selectedProperty.status}</p>
-                </div>
+          <div className="p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              {selectedProperty.title}
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {selectedProperty.description}
+            </p>
+
+            {/* INFO GRID */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">
+              <div className="space-y-2">
+                <p><strong>Property For:</strong> {selectedProperty.propertyFor}</p>
+                <p><strong>Type:</strong> {selectedProperty.propertyType}</p>
+                <p><strong>Price:</strong> ₹{selectedProperty.price.toLocaleString()}</p>
+                <p><strong>Area:</strong> {selectedProperty.area} sq.ft</p>
               </div>
 
-              <p className="mb-2"><strong>Amenities:</strong> {selectedProperty.amenities.join(", ")}</p>
-              <p className="mb-4">
-                <strong>Address:</strong> {selectedProperty.address}, {selectedProperty.locality}, {selectedProperty.city}, {selectedProperty.state}, {selectedProperty.pincode}
-              </p>
-
-              {/* Images */}
-              {selectedProperty.images.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {selectedProperty.images.map((image, index) => (
-                    <img
-                      key={index}
-                      src={image}
-                      alt={`Property Image ${index + 1}`}
-                      className="w-full h-64 object-cover rounded-lg shadow-md"
-                    />
-                  ))}
-                </div>
-              )}
+              <div className="space-y-2">
+                <p><strong>Bedrooms:</strong> {selectedProperty.bedrooms}</p>
+                <p><strong>Bathrooms:</strong> {selectedProperty.bathrooms}</p>
+                <p><strong>Furnishing:</strong> {selectedProperty.furnishing}</p>
+                <p>
+                  <strong>Status:</strong>{" "}
+                  <span className="inline-block px-3 py-1 rounded-full text-xs bg-gray-100">
+                    {selectedProperty.status}
+                  </span>
+                </p>
+              </div>
             </div>
+
+            <p className="mb-3 text-sm">
+              <strong>Amenities:</strong>{" "}
+              {selectedProperty.amenities.join(", ")}
+            </p>
+
+            <p className="mb-6 text-sm">
+              <strong>Address:</strong>{" "}
+              {selectedProperty.address}, {selectedProperty.locality},{" "}
+              {selectedProperty.city}, {selectedProperty.state} -{" "}
+              {selectedProperty.pincode}
+            </p>
+
+            {/* IMAGES */}
+            {selectedProperty.images.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {selectedProperty.images.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    className="rounded-lg h-56 w-full object-cover border"
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    )}
+  </div>
   );
 }

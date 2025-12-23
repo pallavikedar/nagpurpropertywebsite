@@ -4,8 +4,10 @@ import { BASE_URL } from '@/app/baseurl';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { useLanguage } from '@/context/language-context';
-
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 const UserRegistration = () => {
+  const router =useRouter()
   const {translations} = useLanguage();
   const t = translations;
   const [name, setName] = useState('');
@@ -47,7 +49,9 @@ const UserRegistration = () => {
       setError('Network error. Please try again later.');
     }
   };
-
+ const handleRegisterRedirect = () => {
+    router.push("/Login"); // Navigate to registration page
+  };
   return (
      <div className="min-h-screen flex flex-col">
           <Navbar />
@@ -125,14 +129,27 @@ const UserRegistration = () => {
               />
             </div>
 
-            <button
+            <Button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+              className="w-full text-white py-2 rounded  transition"
             >
              {t.Register}
-            </button>
+            </Button>
           </form>
+          <div style={{textAlign:"right"}} className="mt-4 text-center ">
+            <p className="text-sm text-muted-foreground">
+              {t.Backto}{" "}
+           <Button
+                variant="link"
+                className="text-primary font-medium"
+                onClick={handleRegisterRedirect}
+              >
+               {t.Login}
+              </Button>
+              </p>
+              </div>
         </div>
+        
       </div>
     </div>
      <Footer />

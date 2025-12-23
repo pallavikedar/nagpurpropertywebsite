@@ -6,7 +6,10 @@ import Footer from "@/components/footer";
 import { BASE_URL } from "@/app/baseurl";
 import Link from "next/link";
 import { Building, Home, LayoutDashboard, ListFilter, LogOut, Plus, Settings, Users,Handshake  } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 export default function AdminPropertiesPage() {
+  const router = useRouter()
   const [properties, setProperties] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -98,6 +101,9 @@ export default function AdminPropertiesPage() {
       }
     }
   };
+  const handleproperty=()=>{
+     router.push("/admin/addProperty"); 
+  }
   return (
     <div className="min-h-screen flex flex-col">
          {/* Sidebar */}
@@ -173,93 +179,109 @@ export default function AdminPropertiesPage() {
             <span className="sr-only">Logout</span>
           </button>
         </div>
-      <main className="flex-1" style={{marginLeft:"280px"}}>
-        <section className="py-12">
-          <div className="container px-4 md:px-6">
-            <h1 className="text-3xl font-bold tracking-tight mb-6 text-center">
-              Admin - Manage Properties
-            </h1>
+      <main className="flex-1 ml-0 md:ml-64 bg-gray-50 min-h-screen">
+  <section className="py-8 px-4 md:px-8">
+    {/* Page Header */}
+    <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Manage Properties
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          View and manage all listed properties
+        </p>
+      </div>
+      <Button onClick={handleproperty}>add Property</Button>
+    </div>
 
-            {loading ? (
-              <p className="text-center">Loading properties...</p>
-            ) : error ? (
-              <p className="text-center text-red-500">{error}</p>
-            ) : properties.length === 0 ? (
-              <p className="text-center">No properties found.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse border border-gray-200">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="border border-gray-200 px-4 py-2 text-left">
-                        Title
-                      </th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">
-                        Description
-                      </th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">
-                        Price
-                      </th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">
-                        Type
-                      </th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">
-                        Status
-                      </th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {properties.map((property: any) => (
-                      <tr key={property.id} className="hover:bg-gray-50">
-                        <td className="border border-gray-200 px-4 py-2">
-                          {property.title}
-                        </td>
-                        <td className="border border-gray-200 px-4 py-2">
-                          {property.description}
-                        </td>
-                        <td className="border border-gray-200 px-4 py-2">
-                          ₹{property.price.toLocaleString()}
-                        </td>
-                        <td className="border border-gray-200 px-4 py-2">
-                          {property.propertyType}
-                        </td>
-                        <td
-                          className={`border border-gray-200 px-4 py-2 ${
-                            property.status === "ACCEPTED"
-                              ? "text-green-600"
-                              : property.status === "PENDING"
-                              ? "text-yellow-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {property.status}
-                        </td>
-                        <td className="border border-gray-200 px-4 py-2">
-                          <select
-                            value={property.status}
-                            onChange={(e) => {
-                              console.log("Selected Status:", e.target.value);
-                              handleStatusChange(property.id, e.target.value);
-                            }}
-                            className="border border-gray-300 rounded px-2 py-1"
-                          >
-                            <option value="PENDING">PENDING</option>
-                            <option value="ACCEPTED">ACCEPTED</option>
-                            <option value="REJECT">REJECT</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </section>
-      </main>
+    {/* Content Card */}
+    <div className="bg-white rounded-xl shadow-sm border">
+      {loading ? (
+        <div className="p-8 text-center text-gray-500">
+          Loading properties...
+        </div>
+      ) : error ? (
+        <div className="p-8 text-center text-red-500">{error}</div>
+      ) : properties.length === 0 ? (
+        <div className="p-8 text-center text-gray-500">
+          No properties found.
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+              <tr>
+                <th className="px-6 py-4 text-left">Title</th>
+                <th className="px-6 py-4 text-left">Description</th>
+                <th className="px-6 py-4 text-left">Price</th>
+                <th className="px-6 py-4 text-left">Type</th>
+                <th className="px-6 py-4 text-left">Status</th>
+                <th className="px-6 py-4 text-left">Action</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y">
+              {properties.map((property: any) => (
+                <tr
+                  key={property.id}
+                  className="hover:bg-gray-50 transition"
+                >
+                  <td className="px-6 py-4 font-medium text-gray-800">
+                    {property.title}
+                  </td>
+
+                  <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
+                    {property.description}
+                  </td>
+
+                  <td className="px-6 py-4 font-semibold text-gray-800">
+                    ₹{property.price.toLocaleString()}
+                  </td>
+
+                  <td className="px-6 py-4 text-gray-600">
+                    {property.propertyType}
+                  </td>
+
+                  {/* Status Badge */}
+                  <td className="px-6 py-4">
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+                        ${
+                          property.status === "ACCEPTED"
+                            ? "bg-green-100 text-green-700"
+                            : property.status === "PENDING"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                    >
+                      {property.status}
+                    </span>
+                  </td>
+
+                  {/* Action */}
+                  <td className="px-6 py-4">
+                    <select
+                      value={property.status}
+                      onChange={(e) =>
+                        handleStatusChange(property.id, e.target.value)
+                      }
+                      className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+                    >
+                      <option value="PENDING">Pending</option>
+                      <option value="ACCEPTED">Accepted</option>
+                      <option value="REJECT">Rejected</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </section>
+</main>
+
     
     </div>
   );
