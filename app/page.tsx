@@ -181,7 +181,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import PropertyCard from "@/components/property-card";
 import HeroSection from "@/components/hero-section";
-import { properties as staticProperties } from "@/lib/data";
+// import { properties as staticProperties } from "@/lib/data";
 import type { Property } from "@/lib/types";
 
 // Separate component for main content
@@ -190,7 +190,7 @@ function HomeContent() {
   const t = translations
   const [languageSelected, setLanguageSelected] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<Property[]>(staticProperties);
+  const [data, setData] = useState<Property[]>();
  
 
   useEffect(() => {
@@ -208,7 +208,7 @@ function HomeContent() {
     if (stored) {
       try {
         const localProps = JSON.parse(stored) as Property[];
-        setData([...localProps, ...staticProperties]);
+        setData([...localProps]);
       } catch (err) {
         console.error("Failed to parse stored properties:", err);
       }

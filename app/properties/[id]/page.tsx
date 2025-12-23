@@ -17,8 +17,8 @@
 //   const t = translations
 
 //   // In a real app, you would fetch the property data based on the ID
-//   const propertyId = parseInt(params.id, 10);
-//   const property = properties.find((p) => p.id === params.id) || properties[0]
+//   const propertyId = parseInt( id , 10);
+//   const property = properties.find((p) => p.id ===  id ) || properties[0]
 
 
 //   return (
@@ -317,7 +317,7 @@
 
 
 "use client";
-
+import React from "react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -357,7 +357,8 @@ interface Property {
   ownerName?: string;
 }
 
-export default function PropertyDetailPage({ params }: { params: { id: string } }) {
+export default function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
+   const { id } = React.use(params); 
   const { translations } = useLanguage();
   const t = translations;
 
@@ -371,7 +372,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
       try {
         setLoading(true);
         const token = localStorage.getItem("usertoken");
-        const response = await fetch(`${BASE_URL}/property/${params.id}`, {
+        const response = await fetch(`${BASE_URL}/property/${ id }`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -391,7 +392,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
     };
 
     fetchPropertyById();
-  }, [params.id]);
+  }, [ id ]);
 
   if (loading)
     return <p className="text-center py-10 text-muted-foreground">Loading property details...</p>;
@@ -493,10 +494,10 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
               </div>
             </div>
             <div className="flex justify-end mt-4">
-              <Button variant="outline" size="sm" className="animate-slide-in-right">
+              {/* <Button variant="outline" size="sm" className="animate-slide-in-right">
                 <Share2 className="h-4 w-4 mr-2" />
                 {t.Share}
-              </Button>
+              </Button> */}
             </div>
           </div>
         </section>

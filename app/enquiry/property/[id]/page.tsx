@@ -356,7 +356,7 @@
 
 
 "use client";
-
+import React from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, MapPin } from "lucide-react";
@@ -381,11 +381,11 @@ interface Property {
 export default function PropertyEnquiryPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
     const router = useRouter();
   // ✅ SAFE PARAM ACCESS (Vercel compatible)
-  const propertyId = params.id;
+   const { id: propertyId } = React.use(params);
 
   // ✅ SAFE localStorage access
   const token =
