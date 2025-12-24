@@ -185,9 +185,11 @@ import HeroSection from "@/components/hero-section";
 // import { properties as staticProperties } from "@/lib/data";
 import type { Property } from "@/lib/types";
 import FloatingContact from "@/components/floatingcontact";
+import { useRouter } from "next/navigation";
 
 // Separate component for main content
 function HomeContent() {
+  const router =useRouter()
   const { language, translations, setLanguage } = useLanguage()
   const t = translations
   const [languageSelected, setLanguageSelected] = useState(false);
@@ -222,7 +224,9 @@ function HomeContent() {
     setLanguageSelected(true);
     setLanguage(lang);
   };
-
+const handleclick =()=>{
+   router.push("/properties");
+}
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
@@ -252,7 +256,7 @@ function HomeContent() {
                 <p className="mt-2 text-muted-foreground">{t.ExploreourhandpickedpropertiesinNagpur}</p>
               </div>
               <div className="mt-4 md:mt-0">
-                <Button variant="outline">{t.ViewAllProperties}</Button>
+                <Button variant="outline" onClick={handleclick}>{t.ViewAllProperties}</Button>
               </div>
             </div>
            

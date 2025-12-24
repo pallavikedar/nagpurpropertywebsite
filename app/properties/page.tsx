@@ -302,9 +302,9 @@ function PropertiesDashboard() {
                           </div>
 
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-muted-foreground">
+                            {/* <span className="text-sm text-muted-foreground">
                               Listed by {property.ownerName}
-                            </span>
+                            </span> */}
                             <Link href={`/properties/${property.id}`}>
                               <Button size="sm">View Details</Button>
                             </Link>

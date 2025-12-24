@@ -103,7 +103,7 @@ export default function PropertyCard() {
               >
                 {property.type === "rent" ? "For Rent" : "For Sell"}
               </Badge>
-              <button
+              {/* <button
                 className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/90 flex items-center justify-center transition-colors hover:bg-white"
                 onClick={(e) => {
                   e.preventDefault();
@@ -117,7 +117,7 @@ export default function PropertyCard() {
                   )}
                 />
                 <span className="sr-only">Add to favorites</span>
-              </button>
+              </button> */}
             </div>
 
             <div className="p-5">

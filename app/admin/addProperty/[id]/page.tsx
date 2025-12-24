@@ -154,7 +154,7 @@ export default function UpdatePropertyPage({
 
       images.forEach((img) => formDataToSend.append("images", img));
 
-      const res = await fetch(`${BASE_URL}/property/${id}`, {
+      const res = await fetch(`${BASE_URL}/editProperty/${id}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
         body: formDataToSend,
