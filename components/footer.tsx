@@ -15,7 +15,7 @@ export default function Footer() {
               {t.YourtrustedpartnerforrealestatesolutionsinNagpurWehelpyoufindbuysellandrentpropertieswithease}
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+              {/* <Link href="#" className="text-gray-400 hover:text-white transition-colors">
                 <Facebook className="h-5 w-5" />
                 <span className="sr-only">{t.Facebook}</span>
               </Link>
@@ -26,7 +26,7 @@ export default function Footer() {
               <Link href="#" className="text-gray-400 hover:text-white transition-colors">
                 <Instagram className="h-5 w-5" />
                 <span className="sr-only">{t.Instagram}</span>
-              </Link>
+              </Link> */}
             </div>
           </div>
 

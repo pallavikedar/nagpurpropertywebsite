@@ -169,6 +169,7 @@
 //   )
 // }
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -183,6 +184,7 @@ import PropertyCard from "@/components/property-card";
 import HeroSection from "@/components/hero-section";
 // import { properties as staticProperties } from "@/lib/data";
 import type { Property } from "@/lib/types";
+import FloatingContact from "@/components/floatingcontact";
 
 // Separate component for main content
 function HomeContent() {
@@ -262,6 +264,7 @@ function HomeContent() {
         </section>
       </main>
       <Footer />
+      <FloatingContact/>
     </div>
   );
 }
