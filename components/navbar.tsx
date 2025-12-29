@@ -293,8 +293,6 @@
 // }
 
 
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -327,96 +325,223 @@ function NavbarDashboard() {
     setIsLanguageMenuOpen(false); // Close the language dropdown
   };
 
+  const toggleMobileMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              {t.appName || "Nagpur Properties"}
-            </span>
-          </Link>
-        </div>
+    <>
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center space-x-2">
+              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                {t.appName || "Nagpur Properties"}
+              </span>
+            </Link>
+          </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
-          <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
-            {t.home || "Home"}
-          </Link>
-          <Link href="/properties" className="text-sm font-medium transition-colors hover:text-primary">
-            {t.Properties || "Properties"}
-          </Link>
-          <Link href="/add-property" className="text-sm font-medium transition-colors hover:text-primary">
-            {t.AddProperty || "Add Property"}
-          </Link>
-          <Link href="/enquiry/legal" className="text-sm font-medium transition-colors hover:text-primary">
-            {t.LegalConsultancy || "Legal Consultancy"}
-          </Link>
-          <Link href="/contact" className="text-sm font-medium transition-colors hover:text-primary">
-            {t.Contact || "Contact"}
-          </Link>
-        </nav>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-6">
+            <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
+              {t.home || "Home"}
+            </Link>
+            <Link href="/properties" className="text-sm font-medium transition-colors hover:text-primary">
+              {t.Properties || "Properties"}
+            </Link>
+            <Link href="/add-property" className="text-sm font-medium transition-colors hover:text-primary">
+              {t.AddProperty || "Add Property"}
+            </Link>
+            <Link href="/enquiry/legal" className="text-sm font-medium transition-colors hover:text-primary">
+              {t.LegalConsultancy || "Legal Consultancy"}
+            </Link>
+            <Link href="/contact" className="text-sm font-medium transition-colors hover:text-primary">
+              {t.Contact || "Contact"}
+            </Link>
+          </nav>
 
-        <div className="hidden md:flex items-center gap-4">
-          {/* Language Dropdown */}
-          <div className="relative">
-            <button
-              className="text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
-            >
-              {language === "english" ? "English" : language === "hindi" ? "हिंदी" : "मराठी"}
-            </button>
-            {isLanguageMenuOpen && (
-              <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg">
+          <div className="hidden md:flex items-center gap-4">
+            {/* Language Dropdown */}
+            <div className="relative">
+              <button
+                className="text-sm font-medium transition-colors hover:text-primary"
+                onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
+              >
+                {language === "english" ? "English" : language === "hindi" ? "हिंदी" : "मराठी"}
+              </button>
+              {isLanguageMenuOpen && (
+                <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg">
+                  <button
+                    className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => handleLanguageChange("english")}
+                  >
+                    English
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => handleLanguageChange("hindi")}
+                  >
+                    हिंदी
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => handleLanguageChange("marathi")}
+                  >
+                    मराठी
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {isLoggedIn ? (
+              <div className="relative">
                 <button
-                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("english")}
+                  className="flex items-center space-x-2"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  aria-label="Toggle profile menu"
                 >
-                  English
+                  <User className="h-6 w-6" />
                 </button>
-                <button
-                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("hindi")}
-                >
-                  हिंदी
-                </button>
-                <button
-                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("marathi")}
-                >
-                  मराठी
-                </button>
+                {isMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg">
+                    <Link
+                      href="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {t.Profile || "Profile"}
+                    </Link>
+                    <Link
+                      href="/myproperty"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {t.MyProperties || "My Properties"}
+                    </Link>
+                    <button
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => {
+                        localStorage.removeItem("isLoggedIn");
+                        localStorage.removeItem("usertoken");
+                        setIsLoggedIn(false);
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      {t.Logout || "Logout"}
+                    </button>
+                  </div>
+                )}
               </div>
+            ) : (
+              <Link href="/Login">
+                <Button>{t.Login || "Login"}</Button>
+              </Link>
             )}
           </div>
 
-          {isLoggedIn ? (
-            <div className="relative">
-              <button
-                className="flex items-center space-x-2"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label="Toggle profile menu"
-              >
-                <User className="h-6 w-6" />
-              </button>
-              {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg">
+          {/* Mobile Menu Button */}
+          <button className="md:hidden" onClick={toggleMobileMenu} aria-label="Toggle menu">
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden">
+            <div
+              className="fixed inset-0 z-40 bg-black/50"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <div className="fixed top-16 left-0 right-0 z-50 bg-background border-b p-4">
+              <nav className="flex flex-col space-y-4 mb-6">
+                <Link
+                  href="/"
+                  className="text-base font-medium transition-colors hover:text-primary"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t.home || "Home"}
+                </Link>
+                <Link
+                  href="/properties"
+                  className="text-base font-medium transition-colors hover:text-primary"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t.Properties || "Properties"}
+                </Link>
+                <Link
+                  href="/add-property"
+                  className="text-base font-medium transition-colors hover:text-primary"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t.AddProperty || "Add Property"}
+                </Link>
+                <Link
+                  href="/enquiry/legal"
+                  className="text-base font-medium transition-colors hover:text-primary"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t.LegalConsultancy || "Legal Consultancy"}
+                </Link>
+                <Link
+                  href="/contact"
+                  className="text-base font-medium transition-colors hover:text-primary"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {t.Contact || "Contact"}
+                </Link>
+              </nav>
+
+              {/* Mobile Language Dropdown */}
+              <div className="mb-4">
+                <button
+                  className="flex items-center justify-between w-full text-sm font-medium transition-colors hover:text-primary mb-2"
+                  onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
+                >
+                  {language === "english" ? "English" : language === "hindi" ? "हिंदी" : "मराठी"}
+                </button>
+                {isLanguageMenuOpen && (
+                  <div className="w-full bg-white border rounded shadow-lg">
+                    <button
+                      className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => handleLanguageChange("english")}
+                    >
+                      English
+                    </button>
+                    <button
+                      className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => handleLanguageChange("hindi")}
+                    >
+                      हिंदी
+                    </button>
+                    <button
+                      className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => handleLanguageChange("marathi")}
+                    >
+                      मराठी
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Login/Profile */}
+              {isLoggedIn ? (
+                <div className="space-y-2">
                   <Link
                     href="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {t.Profile || "Profile"}
                   </Link>
                   <Link
                     href="/myproperty"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {t.MyProperties || "My Properties"}
                   </Link>
                   <button
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
                     onClick={() => {
                       localStorage.removeItem("isLoggedIn");
                       localStorage.removeItem("usertoken");
@@ -427,20 +552,15 @@ function NavbarDashboard() {
                     {t.Logout || "Logout"}
                   </button>
                 </div>
+              ) : (
+                <Link href="/Login" onClick={() => setIsMenuOpen(false)}>
+                  <Button className="w-full">{t.Login || "Login"}</Button>
+                </Link>
               )}
             </div>
-          ) : (
-            <Link href="/Login">
-              <Button>{t.Login || "Login"}</Button>
-            </Link>
-          )}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
-          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-      </div>
-    </header>
+          </div>
+        )}
+      </header>
+    </>
   );
 }
