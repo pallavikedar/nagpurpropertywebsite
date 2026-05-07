@@ -1,270 +1,28 @@
-// "use client"
-
-// import { Label } from "@/components/ui/label"
-
-// import { useState,useEffect } from "react"
-// import Link from "next/link"
-// import { Building, Home, LayoutDashboard, ListFilter, LogOut, Plus, Settings, Users, Handshake  } from "lucide-react"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { Badge } from "@/components/ui/badge"
-// import { properties } from "@/lib/data"
-// import { useRouter } from "next/navigation";
-
-
-// export default function AdminDashboard() {
-//   const router = useRouter()
-//   const [isLoggedIn, setIsLoggedIn] = useState(false)
-
-//  const handleclick = () => {
-//     localStorage.removeItem("token")
-//     router.push("/Login"); 
-    
-//  }
-//  useEffect(() => {
-//   // Check if the user is logged in
-//   const adminLoggedIn = Boolean(localStorage.getItem("adminLoggedIn")); // Replace with actual logic
-//   setIsLoggedIn(adminLoggedIn);
-
-//   // Redirect based on login status
-//   if (!adminLoggedIn) {
-//     router.push("/Login"); // Redirect to login if not logged in
-//   } else {
-//     router.push("/admin"); // Redirect to admin dashboard if logged in
-//   }
-// }, [router]);
-
-// if (!isLoggedIn) {
-//   return null; // Prevent rendering until redirection is complete
-// }
-//   return (
-//     <div className="min-h-screen bg-muted/30">
-//       <div className="flex">
-//         {/* Sidebar */}
-//         <div className="hidden md:flex w-64 flex-col fixed inset-y-0 bg-white border-r z-10">
-//           <div className="p-4 border-b">
-//             <Link href="/" className="flex items-center space-x-2">
-//               <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-//                 Nagpur Properties
-//               </span>
-//             </Link>
-//           </div>
-//           <div className="flex-1 py-6 px-4 space-y-1">
-//             <Link
-//               href="/admin"
-//               className="flex items-center space-x-2 px-3 py-2 rounded-md bg-muted text-primary font-medium"
-//             >
-//               <LayoutDashboard className="h-5 w-5" />
-//               <span>Dashboard</span>
-//             </Link>
-//             <Link
-//               href="/admin/Properties"
-//               className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-//             >
-//               <Building className="h-5 w-5" />
-//               <span>Properties</span>
-//             </Link>
-//             <Link
-//               href="/admin/propertyEnquiry"
-//               className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-//             >
-//               <Users className="h-5 w-5" />
-//               <span>Enquiries</span>
-//             </Link>
-//             <Link
-//               href="/admin/enquiries"
-//               className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-//             >
-//               <Handshake  className="h-5 w-5" />
-//               <span>Legal Consultancy Enquiry</span>
-//             </Link>
-//             <Link
-//               href="/admin/getusers"
-//               className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-//             >
-//               <Settings className="h-5 w-5" />
-//               <span>Users</span>
-//             </Link>
-//           </div>
-//           <div className="p-4 border-t">
-//             <button
-//               className="flex items-center space-x-2 px-3 py-2 w-full rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-//               onClick={handleclick}
-//             >
-//               <LogOut className="h-5 w-5" />
-//               <span>Logout</span>
-//             </button>
-//           </div>
-//         </div>
-
-//         {/* Mobile Header */}
-//         <div className="md:hidden fixed top-0 inset-x-0 h-16 bg-white border-b z-10 flex items-center justify-between px-4">
-//           <Link href="/" className="flex items-center space-x-2">
-//             <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-//               NP Admin
-//             </span>
-//           </Link>
-//           <button
-//             className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-//             onClick={handleclick}
-//           >
-//             <LogOut className="h-5 w-5" />
-//             <span className="sr-only">Logout</span>
-//           </button>
-//         </div>
-
-//         {/* Main Content */}
-//         <div className="flex-1 md:ml-64 pt-16 md:pt-0">
-//           <div className="p-6">
-//             <div className="mb-8">
-//               <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-//               <p className="text-muted-foreground">Welcome to your admin dashboard</p>
-//             </div>
-
-//             {/* Stats */}
-//             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-//               <div className="bg-white p-6 rounded-lg shadow-sm border">
-//                 <div className="flex items-center">
-//                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-//                     <Building className="h-6 w-6 text-primary" />
-//                   </div>
-//                   <div>
-//                     <p className="text-muted-foreground">Total Properties</p>
-//                     {/* <h3 className="text-2xl font-bold">{properties.length}</h3> */}
-//                   </div>
-//                 </div>
-//               </div>
-
-//               <div className="bg-white p-6 rounded-lg shadow-sm border">
-//                 <div className="flex items-center">
-//                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-//                     <Home className="h-6 w-6 text-primary" />
-//                   </div>
-//                   <div>
-//                     <p className="text-muted-foreground">For Sale</p>
-//                     {/* <h3 className="text-2xl font-bold">{properties.filter((p) => p.type === "buy").length}</h3> */}
-//                   </div>
-//                 </div>
-//               </div>
-
-//               <div className="bg-white p-6 rounded-lg shadow-sm border">
-//                 <div className="flex items-center">
-//                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-//                     <Building className="h-6 w-6 text-primary" />
-//                   </div>
-//                   <div>
-//                     <p className="text-muted-foreground">For Rent</p>
-//                     {/* <h3 className="text-2xl font-bold">{properties.filter((p) => p.type === "rent").length}</h3> */}
-//                   </div>
-//                 </div>
-//               </div>
-
-//               <div className="bg-white p-6 rounded-lg shadow-sm border">
-//                 <div className="flex items-center">
-//                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-//                     <Users className="h-6 w-6 text-primary" />
-//                   </div>
-//                   <div>
-//                     <p className="text-muted-foreground">Enquiries</p>
-//                     {/* <h3 className="text-2xl font-bold">24</h3> */}
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-
-           
-//             {/* Quick Actions */}
-//             <div className="bg-white p-6 rounded-lg shadow-sm border">
-//               <h2 className="text-xl font-semibold mb-6">Quick Actions</h2>
-//               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-//                 <Button className="h-auto py-4 justify-start">
-//                   <Plus className="h-5 w-5 mr-2" />
-//                   Add New Property
-//                 </Button>
-//                 <Button variant="outline" className="h-auto py-4 justify-start">
-//                   <ListFilter className="h-5 w-5 mr-2" />
-//                   Manage Properties
-//                 </Button>
-//                 <Button variant="outline" className="h-auto py-4 justify-start">
-//                   <Users className="h-5 w-5 mr-2" />
-//                   View Enquiries
-//                 </Button>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// // function AdminLogin({ onLogin }: { onLogin: () => void }) {
-// //   return (
-// //     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
-// //       <div className="w-full max-w-md">
-// //         <div className="text-center mb-8">
-// //           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-// //             Nagpur Properties
-// //           </h1>
-// //           <p className="text-muted-foreground mt-2">Admin Dashboard</p>
-// //         </div>
-
-// //         <div className="bg-white p-8 rounded-lg shadow-md border">
-// //           <h2 className="text-xl font-bold mb-6">Login to Admin Panel</h2>
-// //           <form
-// //             className="space-y-4"
-// //             onSubmit={(e) => {
-// //               e.preventDefault()
-// //               onLogin()
-// //             }}
-// //           >
-// //             <div className="space-y-2">
-// //               <Label htmlFor="email">Email</Label>
-// //               <Input id="email" type="email" placeholder="Enter your email" defaultValue="admin@nagpurproperties.com" />
-// //             </div>
-
-// //             <div className="space-y-2">
-// //               <div className="flex items-center justify-between">
-// //                 <Label htmlFor="password">Password</Label>
-// //                 <Link href="#" className="text-sm text-primary hover:underline">
-// //                   Forgot password?
-// //                 </Link>
-// //               </div>
-// //               <Input id="password" type="password" placeholder="Enter your password" defaultValue="admin123" />
-// //             </div>
-
-// //             <Button type="submit" className="w-full">
-// //               Login
-// //             </Button>
-// //           </form>
-
-// //           <div className="mt-6 text-center text-sm">
-// //             <Link href="/" className="text-primary hover:underline">
-// //               Return to Website
-// //             </Link>
-// //           </div>
-// //         </div>
-// //       </div>
-// //     </div>
-// //   )
-// // }
-
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Building,
   Home,
-  LayoutDashboard,
   Users,
-  LogOut,
-  Handshake,
-  Settings,
+  TrendingUp,
+  Activity,
+  Calendar,
+  Eye,
+  ThumbsUp,
+  ThumbsDown,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
+  Download,
+  Filter,
+  ChevronDown,
 } from "lucide-react";
-
 import {
   PieChart,
   Pie,
@@ -277,211 +35,418 @@ import {
   YAxis,
   CartesianGrid,
   Legend,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
 } from "recharts";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BASE_URL } from "../baseurl";
+import AdminSidebar from "@/components/admin-sidebar";
 
-
-const COLORS = ["#4690beff", "#16a34a", "#f59e0b", "#dc2626"];
+const COLORS = ["#4690be", "#16a34a", "#f59e0b", "#dc2626"];
 
 export default function AdminDashboard() {
   const router = useRouter();
-
-  const [properties, setProperties] = useState<any[]>([]);
-  const [enquiries, setEnquiries] = useState<any[]>([]);
+  const [properties, setProperties] = useState([]);
+  const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalProperties: 0,
+    accepted: 0,
+    pending: 0,
+    rejected: 0,
+    totalEnquiries: 0,
+  });
 
-  /* ---------------- AUTH ---------------- */
+  // Auth Check
   useEffect(() => {
     const token = localStorage.getItem("admintoken");
-    if (!token) router.push("/Login");
+    if (!token) {
+      router.push("/Login");
+    }
   }, [router]);
 
-  /* ---------------- FETCH PROPERTIES ---------------- */
+  // Fetch Properties
   useEffect(() => {
     const fetchProperties = async () => {
       const token = localStorage.getItem("admintoken");
-      const res = await fetch(`${BASE_URL}/properties`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setProperties(data);
+      if (!token) return;
+      
+      try {
+        const res = await fetch(`${BASE_URL}/properties`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setProperties(data);
+        
+        setStats(prev => ({
+          ...prev,
+          totalProperties: data.length,
+          accepted: data.filter(p => p.status === "ACCEPTED").length,
+          pending: data.filter(p => p.status === "PENDING").length,
+          rejected: data.filter(p => p.status === "REJECT").length,
+        }));
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      }
     };
     fetchProperties();
   }, []);
 
-  /* ---------------- FETCH ENQUIRIES ---------------- */
+  // Fetch Enquiries
   useEffect(() => {
     const fetchEnquiries = async () => {
       const token = localStorage.getItem("admintoken");
-      const res = await fetch(`${BASE_URL}/AllProperty-enquiries`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await res.json();
-      setEnquiries(data);
-      setLoading(false);
+      if (!token) return;
+      
+      try {
+        const res = await fetch(`${BASE_URL}/AllProperty-enquiries`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await res.json();
+        setEnquiries(data);
+        setStats(prev => ({ ...prev, totalEnquiries: data.length }));
+      } catch (error) {
+        console.error("Error fetching enquiries:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchEnquiries();
   }, []);
 
-  /* ---------------- CHART DATA ---------------- */
   const propertyStatusData = [
-    { name: "Accepted", value: properties.filter(p => p.status === "ACCEPTED").length },
-    { name: "Pending", value: properties.filter(p => p.status === "PENDING").length },
-    { name: "Rejected", value: properties.filter(p => p.status === "REJECT").length },
+    { name: "Accepted", value: stats.accepted, color: "#16a34a" },
+    { name: "Pending", value: stats.pending, color: "#f59e0b" },
+    { name: "Rejected", value: stats.rejected, color: "#dc2626" },
   ];
 
-  const enquiryGraphData = Object.values(
-    enquiries.reduce((acc: any, e: any) => {
-      acc[e.visitDate] = acc[e.visitDate] || { date: e.visitDate, count: 0 };
-      acc[e.visitDate].count++;
-      return acc;
-    }, {})
-  );
-
-  const isUpcomingVisit = (date: string) => {
-    const today = new Date();
-    const visit = new Date(date);
-    const diff = (visit.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
-    return diff >= 0 && diff <= 3;
+  const getWeeklyTrendData = () => {
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    // Group enquiries by day of week
+    const enquiriesByDay = days.map(day => ({ day, count: 0 }));
+    
+    enquiries.forEach(enquiry => {
+      const date = new Date(enquiry.createdAt || enquiry.visitDate);
+      const dayName = days[date.getDay() === 0 ? 6 : date.getDay() - 1];
+      const dayData = enquiriesByDay.find(d => d.day === dayName);
+      if (dayData) dayData.count++;
+    });
+    
+    return enquiriesByDay;
   };
 
-  if (loading) return <div className="p-10">Loading...</div>;
+  const statCards = [
+    { 
+      title: "Total Properties", 
+      value: stats.totalProperties, 
+      icon: Building, 
+      gradient: "from-blue-500 to-cyan-500",
+      change: "+12%",
+      changeType: "up"
+    },
+    { 
+      title: "Accepted", 
+      value: stats.accepted, 
+      icon: CheckCircle, 
+      gradient: "from-green-500 to-emerald-500",
+      change: "+8%",
+      changeType: "up"
+    },
+    { 
+      title: "Pending", 
+      value: stats.pending, 
+      icon: Clock, 
+      gradient: "from-yellow-500 to-orange-500",
+      change: "-3%",
+      changeType: "down"
+    },
+    { 
+      title: "Total Enquiries", 
+      value: stats.totalEnquiries, 
+      icon: Users, 
+      gradient: "from-purple-500 to-pink-500",
+      change: "+25%",
+      changeType: "up"
+    },
+  ];
+
+  if (loading) {
+    return (
+      <AdminSidebar>
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+            <p className="text-gray-500">Loading dashboard data...</p>
+          </div>
+        </div>
+      </AdminSidebar>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-muted/30 flex">
-
-      {/* ---------------- SIDEBAR (UNCHANGED) ---------------- */}
-      <div className="hidden md:flex w-64 flex-col fixed inset-y-0 bg-white border-r z-10">
-        <div className="p-4 border-b">
-          <Link href="/" className="text-xl font-bold">Nagpur Properties</Link>
-        </div>
-
-        <div className="flex-1 p-4 space-y-2">
-          <Link href="/admin" className="flex items-center gap-2 p-2 bg-muted rounded">
-            <LayoutDashboard size={18} /> Dashboard
-          </Link>
-          <Link href="/admin/Properties" className="flex items-center gap-2 p-2">
-            <Building size={18} /> Properties
-          </Link>
-          <Link href="/admin/propertyEnquiry" className="flex items-center gap-2 p-2">
-            <Users size={18} /> Enquiries
-          </Link>
-          <Link href="/admin/enquiries" className="flex items-center gap-2 p-2">
-            <Handshake size={18} /> Legal Enquiry
-          </Link>
-          <Link href="/admin/getusers" className="flex items-center gap-2 p-2">
-            <Settings size={18} /> Users
-          </Link>
-        </div>
-
-        <div className="p-4 border-t">
-          <button
-            onClick={() => {
-              localStorage.removeItem("admintoken");
-              router.push("/Login");
-            }}
-            className="flex gap-2 text-red-600"
-          >
-            <LogOut size={18} /> Logout
-          </button>
-        </div>
-      </div>
-
-      {/* ---------------- MAIN ---------------- */}
-      <div className="flex-1 md:ml-64 p-6">
-
-        {/* ---------------- STATS ---------------- */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-          <Stat title="Total Properties" value={properties.length} icon={<Building />} />
-          <Stat title="Accepted" value={propertyStatusData[0].value} icon={<Home />} />
-          <Stat title="Pending" value={propertyStatusData[1].value} icon={<Home />} />
-          <Stat title="Enquiries" value={enquiries.length} icon={<Users />} />
-        </div>
-
-        {/* ---------------- CHARTS (ADDED) ---------------- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
-          <div className="bg-white p-6 rounded-lg border shadow-sm">
-            <h3 className="font-semibold mb-4">Property Status</h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie data={propertyStatusData} dataKey="value" outerRadius={90} label>
-                  {propertyStatusData.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+    <AdminSidebar>
+      <div className="p-4 md:p-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                Dashboard Overview
+              </h1>
+              <p className="text-gray-500 mt-1">
+                Welcome back! Here's what's happening with your properties today.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Export Report
+              </Button>
+              <Button 
+                className="gap-2 bg-gradient-to-r from-primary to-primary/70 hover:shadow-lg transition-all"
+                onClick={() => window.location.reload()}
+              >
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </Button>
+            </div>
           </div>
-
-          <div className="bg-white p-6 rounded-lg border shadow-sm">
-            <h3 className="font-semibold mb-4">Enquiries by Visit Date</h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={enquiryGraphData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" fill="#4185a2ff" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
         </div>
 
-        {/* ---------------- ENQUIRY TABLE ---------------- */}
-        <div className="bg-white p-6 rounded-lg shadow border">
-          <h2 className="text-xl font-semibold mb-4">Property Enquiries</h2>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {statCards.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 cursor-pointer"
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.gradient} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <Icon className="h-6 w-6 text-white" />
+                    </div>
+                    <Badge 
+                      variant={stat.changeType === "up" ? "default" : "destructive"} 
+                      className="text-xs font-semibold"
+                    >
+                      {stat.change}
+                    </Badge>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">{stat.value.toLocaleString()}</h3>
+                  <p className="text-gray-500 text-sm mt-1">{stat.title}</p>
+                </div>
+                <div className={`h-1 bg-gradient-to-r ${stat.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left`} />
+              </motion.div>
+            );
+          })}
+        </div>
 
-          <table className="min-w-full divide-y">
-            <thead className="bg-gray-100">
-              <tr>
-                {["Name", "Email", "Phone", "Message", "Visit Date"].map(h => (
-                  <th key={h} className="px-4 py-2 text-left text-sm font-semibold">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {enquiries.map((e, i) => (
-                <tr key={i}>
-                  <td className="px-4 py-2">{e.fullName}</td>
-                  <td className="px-4 py-2">{e.email}</td>
-                  <td className="px-4 py-2">{e.phone}</td>
-                  <td className="px-4 py-2">{e.message}</td>
-                  <td
-                    className={`px-4 py-2 ${
-                      isUpcomingVisit(e.visitDate)
-                        ? "bg-yellow-100 text-yellow-800 font-semibold"
-                        : ""
-                    }`}
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Pie Chart */}
+          <Card className="shadow-lg hover:shadow-xl transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <PieChart className="h-5 w-5 text-primary" />
+                Property Status Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={propertyStatusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   >
-                    {e.visitDate}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    {propertyStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend verticalAlign="bottom" height={36} />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Area Chart */}
+          <Card className="shadow-lg hover:shadow-xl transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                Weekly Enquiry Trend
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={getWeeklyTrendData()}>
+                  <defs>
+                    <linearGradient id="colorEnquiries" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#4690be" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#4690be" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="day" />
+                  <YAxis />
+                  <Tooltip />
+                  <Area 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="#4690be" 
+                    fill="url(#colorEnquiries)" 
+                    name="Enquiries"
+                  />
+                  <Legend />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         </div>
 
+        {/* Recent Enquiries Table */}
+        <Card className="shadow-lg">
+          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Recent Property Enquiries
+            </CardTitle>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Filter className="h-4 w-4" />
+              Filter
+              <ChevronDown className="h-3 w-3" />
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Email</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Phone</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600 hidden md:table-cell">Message</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Visit Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {enquiries.slice(0, 5).map((enquiry, idx) => (
+                    <motion.tr
+                      key={idx}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                        {enquiry.fullName || enquiry.name}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {enquiry.email}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {enquiry.phone}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate hidden md:table-cell">
+                        {enquiry.message}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          {new Date(enquiry.visitDate || enquiry.createdAt).toLocaleDateString()}
+                        </Badge>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {enquiries.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No enquiries found</p>
+              </div>
+            )}
+            
+            {enquiries.length > 0 && (
+              <div className="mt-6 text-center">
+                <Link href="/admin/propertyEnquiry">
+                  <Button variant="outline" className="gap-2">
+                    View All Enquiries ({enquiries.length})
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          <motion.div
+            whileHover={{ y: -5 }}
+            className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl shadow-lg overflow-hidden cursor-pointer group"
+          >
+            <div className="p-6 text-white">
+              <Building className="h-10 w-10 mb-4 opacity-90 group-hover:scale-110 transition-transform" />
+              <h3 className="text-xl font-semibold mb-2">Add New Property</h3>
+              <p className="text-sm opacity-90 mb-4">List a new property on the platform</p>
+              <Link href="/add-property">
+                <Button variant="secondary" className="w-full bg-white/20 hover:bg-white/30 text-white border-0">
+                  Add Property
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ y: -5 }}
+            className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg overflow-hidden cursor-pointer group"
+          >
+            <div className="p-6 text-white">
+              <Users className="h-10 w-10 mb-4 opacity-90 group-hover:scale-110 transition-transform" />
+              <h3 className="text-xl font-semibold mb-2">Manage Properties</h3>
+              <p className="text-sm opacity-90 mb-4">Review and moderate property listings</p>
+              <Link href="/admin/Properties">
+                <Button variant="secondary" className="w-full bg-white/20 hover:bg-white/30 text-white border-0">
+                  Manage Properties
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ y: -5 }}
+            className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl shadow-lg overflow-hidden cursor-pointer group"
+          >
+            <div className="p-6 text-white">
+              <TrendingUp className="h-10 w-10 mb-4 opacity-90 group-hover:scale-110 transition-transform" />
+              <h3 className="text-xl font-semibold mb-2">Analytics Report</h3>
+              <p className="text-sm opacity-90 mb-4">View detailed analytics and insights</p>
+              <Button variant="secondary" className="w-full bg-white/20 hover:bg-white/30 text-white border-0">
+                View Reports
+              </Button>
+            </div>
+          </motion.div>
+        </div>
       </div>
-    </div>
+    </AdminSidebar>
   );
 }
-
-/* ---------------- SMALL COMPONENT ---------------- */
-const Stat = ({ title, value, icon }: any) => (
-  <div className="bg-white p-5 rounded border flex items-center gap-4">
-    <div className="p-3 bg-primary/10 rounded">{icon}</div>
-    <div>
-      <p className="text-muted-foreground">{title}</p>
-      <h3 className="text-2xl font-bold">{value}</h3>
-    </div>
-  </div>
-);

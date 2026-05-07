@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,19 @@ import { BASE_URL } from "@/app/baseurl";
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { useLanguage } from "@/context/language-context";
+import { 
+  Mail, 
+  Lock, 
+  Eye, 
+  EyeOff, 
+  LogIn, 
+  UserPlus,
+  Building,
+  CheckCircle,
+  AlertCircle,
+  Shield,
+  Loader2
+} from "lucide-react";
 
 export default function LoginPage() {
   const { translations } = useLanguage();
@@ -19,23 +33,26 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  console.log("API URL:", BASE_URL); // Log the BASE_URL for debugging
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [id]: value,
     }));
+    // Clear error when user starts typing
+    if (error) setError("");
   };
-  const handleSubmit = async (e: React.FormEvent) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-  
+
     try {
       const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
@@ -47,118 +64,290 @@ export default function LoginPage() {
           password: formData.password,
         }),
       });
-  
+
       const data = await response.json();
-      console.log("Response data:", data); // Log the response data for debugging
-  
+
       if (response.ok) {
-        setIsLoggedIn(true);
-        // localStorage.setItem("token", data.jwtToken); // Save token
-        // localStorage.setItem("isLoggedIn", "true"); // Save login status
-  
-        // Extract roleName based on whether admin or user is present
         let roleName = null;
         if (data.admin) {
-          roleName = data.admin.role[0].roleName; // Extract roleName from admin
+          roleName = data.admin.role[0].roleName;
           localStorage.setItem("admintoken", data.jwtToken);
           localStorage.setItem("adminLoggedIn", "true");
+          if (data.admin.name) localStorage.setItem("adminName", data.admin.name);
+          if (data.admin.email) localStorage.setItem("adminEmail", data.admin.email);
         } else if (data.user) {
-          roleName = data.user.role[0].roleName; // Extract roleName from user
+          roleName = data.user.role[0].roleName;
           localStorage.setItem("usertoken", data.jwtToken);
           localStorage.setItem("userLoggedIn", "true");
+          if (data.user.name) localStorage.setItem("userName", data.user.name);
+          if (data.user.email) localStorage.setItem("userEmail", data.user.email);
         }
-  
-        console.log("Role Name:", roleName); // Log the role name for debugging
-        localStorage.setItem("role", roleName); // Save role in localStorage
-  
-        alert("Login Successful!");
-  
+
+        if (rememberMe) {
+          localStorage.setItem("rememberedEmail", formData.email);
+        } else {
+          localStorage.removeItem("rememberedEmail");
+        }
+
+        localStorage.setItem("role", roleName);
+
         // Redirect based on role
         if (roleName === "Admin") {
-          router.push("/admin"); // Redirect to admin dashboard
-          
+          router.push("/admin");
         } else if (roleName === "User") {
-          router.push("/"); // Redirect to user dashboard
-         
+          router.push("/");
         } else {
-          console.error("Unknown role:", roleName);
           setError("Unknown role. Please contact support.");
+          setLoading(false);
+          return;
         }
       } else {
-        console.error("Error response:", data); // Log the error response
         setError(data.message || "Login failed. Please try again.");
+        setLoading(false);
       }
     } catch (err) {
-      console.error("Login error:", err);
       setError("Network error or server issue. Please try again later.");
-    } finally {
       setLoading(false);
     }
   };
+
   const handleRegisterRedirect = () => {
-    router.push("/user/Register"); // Navigate to registration page
+    router.push("/user/Register");
   };
 
+  // Load remembered email on mount
+  useState(() => {
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    if (rememberedEmail) {
+      setFormData(prev => ({ ...prev, email: rememberedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col">
-              <Navbar />
-    <div className="min-h-screen flex items-center justify-center bg-muted">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            {t.Login}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid gap-2">
-              <Label htmlFor="userId">{t.email}</Label>
-              <Input
-                id="email"
-                placeholder={t.enterEmail}
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+      <Navbar />
+      
+      <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md">
+          {/* Logo/Brand Section */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-8"
+          >
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-primary to-primary/70 shadow-lg mb-4">
+              <Building className="h-8 w-8 text-white" />
             </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="password">{t.password}</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder={t.enterPassword}
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {error && (
-              <div className="text-sm text-red-600 font-medium">{error}</div>
-            )}
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? t.Loggingin : t.Login}
-            </Button>
-          </form>
-
-          <div className="mt-4 text-center">
-            <p className="text-sm text-muted-foreground">
-              {t.Donthaveanaccount}{" "}
-              <Button
-                variant="link"
-                className="text-primary font-medium"
-                onClick={handleRegisterRedirect}
-              >
-               {t.UserRegistration}
-              </Button>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              Welcome Back
+            </h2>
+            <p className="text-gray-500 mt-2">
+              Sign in to your account to continue
             </p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-    <Footer />
+          </motion.div>
+
+          {/* Login Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="shadow-xl border-0 rounded-2xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b pb-6">
+                <CardTitle className="text-2xl font-bold text-center text-gray-800">
+                  {t.Login || "Login"}
+                </CardTitle>
+              </CardHeader>
+              
+              <CardContent className="pt-8 pb-6 px-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Email Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-gray-700 font-medium flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-primary" />
+                      {t.email || "Email Address"}
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder={t.enterEmail || "Enter your email"}
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="pl-4 py-3 rounded-xl border-gray-200 focus:border-primary focus:ring-primary/20 transition-all"
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Password Field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-gray-700 font-medium flex items-center gap-2">
+                      <Lock className="h-4 w-4 text-primary" />
+                      {t.password || "Password"}
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder={t.enterPassword || "Enter your password"}
+                        value={formData.password}
+                        onChange={handleChange}
+                        className="pl-4 pr-10 py-3 rounded-xl border-gray-200 focus:border-primary focus:ring-primary/20 transition-all"
+                        required
+                        disabled={loading}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        disabled={loading}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Remember Me & Forgot Password */}
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        disabled={loading}
+                      />
+                      <span className="text-sm text-gray-600">Remember me</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/forgot-password")}
+                      className="text-sm text-primary hover:text-primary/80 transition-colors"
+                      disabled={loading}
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+
+                  {/* Error Message */}
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm"
+                      >
+                        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                        <span>{error}</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Login Button with Enhanced Loader */}
+                  <Button 
+                    type="submit" 
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-primary to-primary/70 hover:shadow-lg transition-all duration-300 py-6 text-base font-semibold rounded-xl relative overflow-hidden"
+                  >
+                    <AnimatePresence mode="wait">
+                      {loading ? (
+                        <motion.div
+                          key="loading"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center justify-center gap-3"
+                        >
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <span>{t.Loggingin || "Logging in..."}</span>
+                          <motion.span
+                            animate={{ opacity: [0, 1, 0] }}
+                            transition={{ repeat: Infinity, duration: 1.5 }}
+                            className="text-sm"
+                          >
+                            .
+                          </motion.span>
+                          <motion.span
+                            animate={{ opacity: [0, 1, 0] }}
+                            transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }}
+                            className="text-sm"
+                          >
+                            .
+                          </motion.span>
+                          <motion.span
+                            animate={{ opacity: [0, 1, 0] }}
+                            transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }}
+                            className="text-sm"
+                          >
+                            .
+                          </motion.span>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="login"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center justify-center gap-2"
+                        >
+                          <LogIn className="h-5 w-5" />
+                          {t.Login || "Login"}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Button>
+
+                  {/* Register Link */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-4 bg-white text-gray-500">or</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleRegisterRedirect}
+                    className="w-full border-2 hover:bg-gray-50 transition-all duration-300 py-6 text-base rounded-xl"
+                    disabled={loading}
+                  >
+                    <UserPlus className="h-5 w-5 mr-2 text-primary" />
+                    {t.UserRegistration || "Create New Account"}
+                  </Button>
+                </form>
+
+                {/* Security Note */}
+                <div className="mt-6 p-3 bg-gray-50 rounded-lg flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <p className="text-xs text-gray-500">
+                    Your credentials are securely encrypted. We never share your data.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Help Text */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-center text-sm text-gray-500 mt-8"
+          >
+            Need help? <a href="/contact" className="text-primary hover:underline">Contact Support</a>
+          </motion.p>
+        </div>
       </div>
+
+      <Footer />
+    </div>
   );
 }

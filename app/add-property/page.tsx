@@ -715,25 +715,41 @@
 
 
 
-
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import {LanguageProvider, useLanguage } from "@/context/language-context"
+import { useLanguage } from "@/context/language-context";
 import { BASE_URL } from "../baseurl";
+import { 
+  Loader2, 
+  CheckCircle, 
+  AlertCircle, 
+  Upload, 
+  X, 
+  Image as ImageIcon,
+  Home,
+  MapPin,
+  Camera,
+  User,
+  DollarSign,
+  SquareFeet,
+  Bed,
+  Bath
+} from "lucide-react";
 
 export default function AddPropertyPage() {
-   const { translations } = useLanguage()
-    const t = translations
-      const amenities = translations.amenities || []
+  const { translations } = useLanguage();
+  const t = translations;
+  const amenities = translations.amenities || [];
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -756,10 +772,30 @@ export default function AddPropertyPage() {
     status: "ACCEPTED",
   });
 
-  const [images, setImages] = useState<File[]>([]); // State to store selected images
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-    const [loading, setLoading] = useState(false); // Loader state
+  const [loading, setLoading] = useState(false);
+  const [currentSection, setCurrentSection] = useState(0);
+
+  const sections = [
+    { title: t.BasicInformation, icon: Home },
+    { title: t.PropertyDetails, icon: DollarSign },
+    { title: t.Amenities, icon: CheckCircle },
+    { title: t.LocationInformation, icon: MapPin },
+    { title: t.ContactInformation, icon: User },
+    { title: t.propertyImages, icon: Camera },
+  ];
+
+  // Cleanup image previews on unmount
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(preview => {
+        URL.revokeObjectURL(preview);
+      });
+    };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -767,6 +803,8 @@ export default function AddPropertyPage() {
       ...prev,
       [id]: value,
     }));
+    // Clear error when user starts typing
+    if (error) setError("");
   };
 
   const handleSelectChange = (id: string, value: string) => {
@@ -774,6 +812,7 @@ export default function AddPropertyPage() {
       ...prev,
       [id]: value,
     }));
+    if (error) setError("");
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -791,15 +830,75 @@ export default function AddPropertyPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setImages(Array.from(e.target.files)); // Convert FileList to an array
+      const newFiles = Array.from(e.target.files);
+      const totalImages = images.length + newFiles.length;
+      
+      if (totalImages > 10) {
+        setError("You can upload a maximum of 10 images");
+        return;
+      }
+
+      // Create preview URLs
+      const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+      
+      setImages(prev => [...prev, ...newFiles]);
+      setImagePreviews(prev => [...prev, ...newPreviews]);
+      setError("");
     }
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    URL.revokeObjectURL(imagePreviews[index]);
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const validateForm = () => {
+    // Basic Information validation
+    if (!formData.title.trim()) return "Please enter property title";
+    if (!formData.description.trim()) return "Please enter property description";
+    if (!formData.propertyFor) return "Please select property purpose";
+    if (!formData.propertyType) return "Please select property type";
+    
+    // Property Details validation
+    if (!formData.price || parseFloat(formData.price) <= 0) return "Please enter valid price";
+    if (!formData.area || parseFloat(formData.area) <= 0) return "Please enter valid area";
+    if (!formData.bedrooms || parseInt(formData.bedrooms) < 0) return "Please enter valid number of bedrooms";
+    if (!formData.bathrooms || parseInt(formData.bathrooms) < 0) return "Please enter valid number of bathrooms";
+    if (!formData.furnishing) return "Please select furnishing status";
+    
+    // Location validation
+    if (!formData.address.trim()) return "Please enter address";
+    if (!formData.locality.trim()) return "Please enter locality";
+    if (!formData.city.trim()) return "Please enter city";
+    if (!formData.state.trim()) return "Please enter state";
+    if (!formData.pincode.trim() || !/^\d{6}$/.test(formData.pincode)) return "Please enter valid 6-digit pincode";
+    
+    // Contact validation
+    if (!formData.ownerName.trim()) return "Please enter owner/agent name";
+    if (!formData.ownerPhone.trim() || !/^\d{10}$/.test(formData.ownerPhone)) return "Please enter valid 10-digit phone number";
+    if (!formData.ownerEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.ownerEmail)) return "Please enter valid email address";
+    
+    // Images validation
+    if (images.length === 0) return "Please upload at least one property image";
+    
+    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setError("");
     setSuccess("");
-      setLoading(true); // Start loader
+    setLoading(true);
 
     try {
       const userToken = localStorage.getItem("usertoken");
@@ -807,75 +906,45 @@ export default function AddPropertyPage() {
       const token = userToken || adminToken;
 
       if (!token) {
-        alert("You need to log in to submit a property.");
-        window.location.href = "/Login";
+        setError("Please log in to submit a property");
+        setTimeout(() => {
+          window.location.href = "/Login";
+        }, 2000);
         return;
       }
 
-      console.log("User Token:", userToken);
-      console.log("Admin Token:", adminToken);
-      console.log("Token being used:", token); // Debugging: Log the token
-
-      // Create FormData object
       const formDataToSend = new FormData();
 
-      // Append JSON data as a string
-      const propertyData = JSON.stringify({
+      const propertyData = {
         ...formData,
         price: parseFloat(formData.price),
         area: parseFloat(formData.area),
         bedrooms: parseInt(formData.bedrooms, 10),
         bathrooms: parseInt(formData.bathrooms, 10),
-      });
+      };
 
-      formDataToSend.append("property", new Blob([propertyData], { type: "application/json" }));
+      formDataToSend.append("property", new Blob([JSON.stringify(propertyData)], { type: "application/json" }));
 
-      // Append images
       images.forEach((image) => {
         formDataToSend.append("images", image);
       });
 
-      // Debugging: Log FormData keys and values
-      for (const pair of formDataToSend.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
-
-      // Send POST request
       const response = await fetch(`${BASE_URL}/addProperty`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`, // Add token for authentication
+          Authorization: `Bearer ${token}`,
         },
         body: formDataToSend,
       });
-      alert("Property submitted successfully!");
-      setLoading(false); // Stop loader
-      if (!response.ok) {
-        const contentType = response.headers.get("content-type");
-        let errorMessage = "Failed to submit property.";
-        console.error("Server error:", response.status, response.statusText);
-        try {
-          if (contentType?.includes("application/json")) {
-            const errorData = await response.json();
-            console.error("Server JSON error:", errorData);
-            errorMessage = errorData.message || errorMessage;
-          } else {
-            const errorText = await response.text();
-            console.error("Server text error:", errorText);
-            if (errorText.includes("Access denied")) {
-              errorMessage = "Access denied. You are not authorized.";
-            }
-          }
-           // Alert on success
-        } catch (err) {
-          console.error("Error reading response body:", err);
-        }
 
-        throw new Error(errorMessage);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || "Failed to submit property");
       }
 
-      // Success
-      setSuccess("Property submitted successfully!");
+      setSuccess("Property submitted successfully! Redirecting...");
+      
+      // Reset form
       setFormData({
         title: "",
         description: "",
@@ -897,331 +966,580 @@ export default function AddPropertyPage() {
         ownerEmail: "",
         status: "ACCEPTED",
       });
+      
+      // Clear images
+      imagePreviews.forEach(preview => URL.revokeObjectURL(preview));
       setImages([]);
+      setImagePreviews([]);
+      
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        window.location.href = "/my-properties";
+      }, 2000);
+      
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  const nextSection = () => {
+    if (currentSection < sections.length - 1) {
+      setCurrentSection(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const prevSection = () => {
+    if (currentSection > 0) {
+      setCurrentSection(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100">
       <Navbar />
       <main className="flex-1">
-         <section
-        className="relative h-[45vh] flex items-center justify-center text-white"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1460472178825-e5240623afd5')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/50" />
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="relative text-center px-4"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold mb-3">
-            {t.AddYourProperty}
-          </h1>
-          <p className="text-lg text-gray-200">
-            {t.ListyourpropertyforsaleorrentonNagpurProperties}
-          </p>
-        </motion.div>
-      </section>
+        {/* Hero Section */}
+        <section className="relative h-[40vh] flex items-center justify-center text-white">
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50 z-10" />
+            <img 
+              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3"
+              alt="Property"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="relative z-20 text-center px-4"
+          >
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+              {t.AddYourProperty}
+            </h1>
+            <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto">
+              {t.ListyourpropertyforsaleorrentonNagpurProperties}
+            </p>
+          </motion.div>
+        </section>
+
+        {/* Progress Indicator */}
+        <div className="sticky top-0 z-30 bg-white shadow-sm border-b">
+          <div className="container px-4 py-3">
+            <div className="flex items-center justify-between max-w-3xl mx-auto">
+              {sections.map((section, index) => {
+                const Icon = section.icon;
+                const isActive = index === currentSection;
+                const isCompleted = index < currentSection;
+                
+                return (
+                  <div key={index} className="flex flex-col items-center">
+                    <div 
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                        isActive ? 'bg-primary text-white scale-110' :
+                        isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'
+                      }`}
+                    >
+                      {isCompleted ? <CheckCircle className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+                    </div>
+                    <span className="hidden md:inline text-xs mt-1 text-gray-600">{section.title}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
         <section className="py-12">
           <div className="container px-4 md:px-6">
-            
             <div className="max-w-3xl mx-auto">
-              <form className="space-y-8" onSubmit={handleSubmit}>
-                {/* Basic Information */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h2 className="text-xl font-semibold mb-4">{t.BasicInformation}</h2>
-                  <div className="space-y-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="title">{t.PropertyTitle}</Label>
-                      <Input
-                        id="title"
-                        placeholder={t.Enteradescriptivetitleforyourproperty}
-                        value={formData.title}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
+              {/* Alerts */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700"
+                  >
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <p>{error}</p>
+                  </motion.div>
+                )}
+                
+                {success && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3 text-green-700"
+                  >
+                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                    <p>{success}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="description">{t.PropertyDescription}</Label>
-                      <Textarea
-                        id="description"
-                        placeholder={t.Describeyourpropertyindetail}
-                        rows={5}
-                        value={formData.description}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
+              <form onSubmit={handleSubmit}>
+                <AnimatePresence mode="wait">
+                  {/* Basic Information */}
+                  {currentSection === 0 && (
+                    <motion.div
+                      key="basic"
+                      initial={{ opacity: 0, x: 100 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -100 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-white rounded-xl shadow-lg border p-6 md:p-8"
+                    >
+                      <h2 className="text-2xl font-bold mb-6 text-gray-800">{t.BasicInformation}</h2>
+                      <div className="space-y-5">
+                        <div>
+                          <Label htmlFor="title" className="text-gray-700 font-medium mb-2 block">
+                            {t.PropertyTitle} <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="title"
+                            placeholder="e.g., Luxurious 3BHK Villa with Garden"
+                            value={formData.title}
+                            onChange={handleChange}
+                            className="focus:ring-2 focus:ring-primary/20"
+                            required
+                          />
+                        </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="propertyFor">{t.PropertyFor}</Label>
-                        <Select
-                          onValueChange={(value) => handleSelectChange("propertyFor", value)}
-                          value={formData.propertyFor}
-                        >
-                          <SelectTrigger id="propertyFor">
-                            <SelectValue placeholder={t.Selectoption}/>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Sale">{t.Sell}</SelectItem>
-                            <SelectItem value="Rent">{t.Rent}</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div>
+                          <Label htmlFor="description" className="text-gray-700 font-medium mb-2 block">
+                            {t.PropertyDescription} <span className="text-red-500">*</span>
+                          </Label>
+                          <Textarea
+                            id="description"
+                            placeholder="Describe your property in detail including features, nearby amenities, etc."
+                            rows={5}
+                            value={formData.description}
+                            onChange={handleChange}
+                            className="focus:ring-2 focus:ring-primary/20"
+                            required
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                          <div>
+                            <Label htmlFor="propertyFor" className="text-gray-700 font-medium mb-2 block">
+                              {t.PropertyFor} <span className="text-red-500">*</span>
+                            </Label>
+                            <Select
+                              onValueChange={(value) => handleSelectChange("propertyFor", value)}
+                              value={formData.propertyFor}
+                            >
+                              <SelectTrigger id="propertyFor" className="focus:ring-2 focus:ring-primary/20">
+                                <SelectValue placeholder="Select purpose" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Sale">{t.Sell}</SelectItem>
+                                <SelectItem value="Rent">{t.Rent}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="propertyType" className="text-gray-700 font-medium mb-2 block">
+                              {t.PropertyType} <span className="text-red-500">*</span>
+                            </Label>
+                            <Select
+                              onValueChange={(value) => handleSelectChange("propertyType", value)}
+                              value={formData.propertyType}
+                            >
+                              <SelectTrigger id="propertyType" className="focus:ring-2 focus:ring-primary/20">
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Villa">{t.Villa}</SelectItem>
+                                <SelectItem value="Apartment">{t.Apartment}</SelectItem>
+                                <SelectItem value="House">{t.House}</SelectItem>
+                                <SelectItem value="Plot">{t.Plot}</SelectItem>
+                                <SelectItem value="Commercial">{t.Commercial}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                       </div>
+                    </motion.div>
+                  )}
 
-                      <div className="grid gap-2">
-                        <Label htmlFor="propertyType">{t.PropertyType}</Label>
-                        <Select
-                          onValueChange={(value) => handleSelectChange("propertyType", value)}
-                          value={formData.propertyType}
-                        >
-                          <SelectTrigger id="propertyType">
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Villa">{t.Villa}</SelectItem>
-                            <SelectItem value="Apartment">{t.Apartment}</SelectItem>
-                            <SelectItem value="House">{t.House}</SelectItem>
-                            <SelectItem value="Plot">{t.Plot}</SelectItem>
-                            <SelectItem value="Commercial">{t.Commercial}</SelectItem>
-                          </SelectContent>
-                        </Select>
+                  {/* Property Details */}
+                  {currentSection === 1 && (
+                    <motion.div
+                      key="details"
+                      initial={{ opacity: 0, x: 100 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -100 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-white rounded-xl shadow-lg border p-6 md:p-8"
+                    >
+                      <h2 className="text-2xl font-bold mb-6 text-gray-800">{t.PropertyDetails}</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                          <Label htmlFor="price" className="text-gray-700 font-medium mb-2 block">
+                            {t.Price} (₹) <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="price"
+                            type="number"
+                            placeholder="Enter price"
+                            value={formData.price}
+                            onChange={handleChange}
+                            className="focus:ring-2 focus:ring-primary/20"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="area" className="text-gray-700 font-medium mb-2 block">
+                            {t.Area} ({t.sqft}) <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="area"
+                            type="number"
+                            placeholder="Enter area"
+                            value={formData.area}
+                            onChange={handleChange}
+                            className="focus:ring-2 focus:ring-primary/20"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="bedrooms" className="text-gray-700 font-medium mb-2 block">
+                            {t.Bedrooms} <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="bedrooms"
+                            type="number"
+                            placeholder="Number of bedrooms"
+                            value={formData.bedrooms}
+                            onChange={handleChange}
+                            className="focus:ring-2 focus:ring-primary/20"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="bathrooms" className="text-gray-700 font-medium mb-2 block">
+                            {t.Bathrooms} <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="bathrooms"
+                            type="number"
+                            placeholder="Number of bathrooms"
+                            value={formData.bathrooms}
+                            onChange={handleChange}
+                            className="focus:ring-2 focus:ring-primary/20"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="furnishing" className="text-gray-700 font-medium mb-2 block">
+                            {t.Furnishing} <span className="text-red-500">*</span>
+                          </Label>
+                          <Select
+                            onValueChange={(value) => handleSelectChange("furnishing", value)}
+                            value={formData.furnishing}
+                          >
+                            <SelectTrigger id="furnishing" className="focus:ring-2 focus:ring-primary/20">
+                              <SelectValue placeholder="Select furnishing" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Fully Furnished">{t.FullyFurnished}</SelectItem>
+                              <SelectItem value="Semi-Furnished">{t.SemiFurnished}</SelectItem>
+                              <SelectItem value="Unfurnished">{t.Unfurnished}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
+                    </motion.div>
+                  )}
 
-                {/* Property Details */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h2 className="text-xl font-semibold mb-4">{t.PropertyDetails}</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="price">{t.Price}</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        placeholder={t.Enterprice}
-                        value={formData.price}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="area">{t.Area} {t.sqft}</Label>
-                      <Input
-                        id="area"
-                        type="number"
-                        placeholder={t.Enterarea}
-                        value={formData.area}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="bedrooms">{t.Bedrooms}</Label>
-                      <Input
-                        id="bedrooms"
-                        type="number"
-                        placeholder={t.Enternumberofbedrooms}
-                        value={formData.bedrooms}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="bathrooms">{t.Bathrooms}</Label>
-                      <Input
-                        id="bathrooms"
-                        type="number"
-                        placeholder={t.Enternumberofbathrooms}
-                        value={formData.bathrooms}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="furnishing">{t.Furnishing}</Label>
-                      <Select
-                        onValueChange={(value) => handleSelectChange("furnishing", value)}
-                        value={formData.furnishing}
-                      >
-                        <SelectTrigger id="furnishing">
-                          <SelectValue placeholder="Select furnishing" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Fully Furnished">{t.FullyFurnished}</SelectItem>
-                          <SelectItem value="Semi-Furnished">{t.SemiFurnished}</SelectItem>
-                          <SelectItem value="Unfurnished">{t.Unfurnished}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Amenities */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h2 className="text-xl font-semibold mb-4">{t.Amenities}</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {amenities.map((amenity) => (
-                      <label key={amenity.key} className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          name={amenity.key}
-                          checked={formData.amenities.includes(amenity.key)}
-                          onChange={handleCheckboxChange}
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                        />
-                        <span>{amenity.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Location Information */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h2 className="text-xl font-semibold mb-4">{t.LocationInformation}</h2>
-                  <div className="grid gap-2">
-                    <Label htmlFor="address">{t.Address}</Label>
-                    <Textarea
-                      id="address"
-                      placeholder={t.Entercompletepropertyaddress}
-                      rows={2}
-                      value={formData.address}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="locality">{t.LocalityArea}</Label>
-                      <Input
-                        id="locality"
-                        placeholder={t.Enterlocality}
-                        value={formData.locality}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="city">{t.City}</Label>
-                      <Input
-                        id="city"
-                        placeholder={t.Entercity}
-                        value={formData.city}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="state">{t.State}</Label>
-                      <Input
-                        id="state"
-                        placeholder={t.Enterstate}
-                        value={formData.state}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="pincode">{t.Pincode}</Label>
-                      <Input
-                        id="pincode"
-                        placeholder={t.Enterpincode}
-                        value={formData.pincode}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h2 className="text-xl font-semibold mb-4">{t.ContactInformation}</h2>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="ownerName">{t.OwnerAgentName}</Label>
-                        <Input 
-                          id="ownerName" 
-                          placeholder={t.Entername} 
-                          value={formData.ownerName}
-                          onChange={handleChange}
-                          required
-                        />
+                  {/* Amenities */}
+                  {currentSection === 2 && (
+                    <motion.div
+                      key="amenities"
+                      initial={{ opacity: 0, x: 100 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -100 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-white rounded-xl shadow-lg border p-6 md:p-8"
+                    >
+                      <h2 className="text-2xl font-bold mb-6 text-gray-800">{t.Amenities}</h2>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {amenities.map((amenity) => (
+                          <label key={amenity.key} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name={amenity.key}
+                              checked={formData.amenities.includes(amenity.key)}
+                              onChange={handleCheckboxChange}
+                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            />
+                            <span className="text-gray-700">{amenity.label}</span>
+                          </label>
+                        ))}
                       </div>
+                    </motion.div>
+                  )}
 
-                      <div className="grid gap-2">
-                        <Label htmlFor="ownerPhone">{t.PhoneNumber}</Label>
-                        <Input 
-                          id="ownerPhone" 
-                          placeholder={t.Enterphonenumber} 
-                          value={formData.ownerPhone}
-                          onChange={handleChange}
-                          required
-                        />
+                  {/* Location Information */}
+                  {currentSection === 3 && (
+                    <motion.div
+                      key="location"
+                      initial={{ opacity: 0, x: 100 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -100 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-white rounded-xl shadow-lg border p-6 md:p-8"
+                    >
+                      <h2 className="text-2xl font-bold mb-6 text-gray-800">{t.LocationInformation}</h2>
+                      <div className="space-y-5">
+                        <div>
+                          <Label htmlFor="address" className="text-gray-700 font-medium mb-2 block">
+                            {t.Address} <span className="text-red-500">*</span>
+                          </Label>
+                          <Textarea
+                            id="address"
+                            placeholder="Enter complete property address"
+                            rows={2}
+                            value={formData.address}
+                            onChange={handleChange}
+                            className="focus:ring-2 focus:ring-primary/20"
+                            required
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                          <div>
+                            <Label htmlFor="locality" className="text-gray-700 font-medium mb-2 block">
+                              {t.LocalityArea} <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="locality"
+                              placeholder="Enter locality"
+                              value={formData.locality}
+                              onChange={handleChange}
+                              className="focus:ring-2 focus:ring-primary/20"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="city" className="text-gray-700 font-medium mb-2 block">
+                              {t.City} <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="city"
+                              placeholder="Enter city"
+                              value={formData.city}
+                              onChange={handleChange}
+                              className="focus:ring-2 focus:ring-primary/20"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                          <div>
+                            <Label htmlFor="state" className="text-gray-700 font-medium mb-2 block">
+                              {t.State} <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="state"
+                              placeholder="Enter state"
+                              value={formData.state}
+                              onChange={handleChange}
+                              className="focus:ring-2 focus:ring-primary/20"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="pincode" className="text-gray-700 font-medium mb-2 block">
+                              {t.Pincode} <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="pincode"
+                              placeholder="Enter pincode"
+                              value={formData.pincode}
+                              onChange={handleChange}
+                              className="focus:ring-2 focus:ring-primary/20"
+                              required
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    </motion.div>
+                  )}
 
-                    <div className="grid gap-2">
-                      <Label htmlFor="ownerEmail">{t.EmailAddress}</Label>
-                      <Input 
-                        id="ownerEmail" 
-                        type="email" 
-                        placeholder={t.Enteremailaddress}
-                        value={formData.ownerEmail}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
+                  {/* Contact Information */}
+                  {currentSection === 4 && (
+                    <motion.div
+                      key="contact"
+                      initial={{ opacity: 0, x: 100 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -100 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-white rounded-xl shadow-lg border p-6 md:p-8"
+                    >
+                      <h2 className="text-2xl font-bold mb-6 text-gray-800">{t.ContactInformation}</h2>
+                      <div className="space-y-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                          <div>
+                            <Label htmlFor="ownerName" className="text-gray-700 font-medium mb-2 block">
+                              {t.OwnerAgentName} <span className="text-red-500">*</span>
+                            </Label>
+                            <Input 
+                              id="ownerName" 
+                              placeholder="Enter name" 
+                              value={formData.ownerName}
+                              onChange={handleChange}
+                              className="focus:ring-2 focus:ring-primary/20"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="ownerPhone" className="text-gray-700 font-medium mb-2 block">
+                              {t.PhoneNumber} <span className="text-red-500">*</span>
+                            </Label>
+                            <Input 
+                              id="ownerPhone" 
+                              placeholder="10-digit phone number" 
+                              value={formData.ownerPhone}
+                              onChange={handleChange}
+                              className="focus:ring-2 focus:ring-primary/20"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="ownerEmail" className="text-gray-700 font-medium mb-2 block">
+                            {t.EmailAddress} <span className="text-red-500">*</span>
+                          </Label>
+                          <Input 
+                            id="ownerEmail" 
+                            type="email" 
+                            placeholder="Enter email address"
+                            value={formData.ownerEmail}
+                            onChange={handleChange}
+                            className="focus:ring-2 focus:ring-primary/20"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Property Images */}
+                  {currentSection === 5 && (
+                    <motion.div
+                      key="images"
+                      initial={{ opacity: 0, x: 100 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -100 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-white rounded-xl shadow-lg border p-6 md:p-8"
+                    >
+                      <h2 className="text-2xl font-bold mb-6 text-gray-800">{t.propertyImages}</h2>
+                      <div className="space-y-4">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                          <input
+                            id="images"
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                          <label htmlFor="images" className="cursor-pointer block">
+                            <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                            <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
+                            <p className="text-sm text-gray-500">PNG, JPG, JPEG up to 10MB each (Max 10 images)</p>
+                            <Button type="button" variant="outline" className="mt-4">
+                              Select Images
+                            </Button>
+                          </label>
+                        </div>
+
+                        {imagePreviews.length > 0 && (
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {imagePreviews.map((preview, index) => (
+                              <div key={index} className="relative group">
+                                <img 
+                                  src={preview} 
+                                  alt={`Preview ${index + 1}`}
+                                  className="w-full h-32 object-cover rounded-lg"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(index)}
+                                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Navigation Buttons */}
+                <div className="flex justify-between gap-4 mt-8">
+                  {currentSection > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={prevSection}
+                      size="lg"
+                      className="px-8"
+                    >
+                      Previous
+                    </Button>
+                  )}
+                  
+                  {currentSection < sections.length - 1 ? (
+                    <Button
+                      type="button"
+                      onClick={nextSection}
+                      size="lg"
+                      className="px-8 ml-auto"
+                    >
+                      Next
+                    </Button>
+                  ) : (
+                    <Button 
+                      type="submit" 
+                      size="lg" 
+                      className="px-8 ml-auto"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        t.SubmitProperty
+                      )}
+                    </Button>
+                  )}
                 </div>
-
-          
-
-                {/* Property Images */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h2 className="text-xl font-semibold mb-4">{t.propertyImages}</h2>
-                  <div className="grid gap-2">
-                    <Label htmlFor="images">{t.UploadImages}</Label>
-                    <input
-                      id="images"
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-                    />
-                  </div>
-                </div>
-
-                {error && <p className="text-red-500">{error}</p>}
-                {success && <p className="text-green-500">{success}</p>}
-
-               <Button type="submit" size="lg" className="mt-4 w-full">
-                  {loading ? "Submitting..." : t.SubmitProperty}
-                </Button>
               </form>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import AppProviders from "@/context/AppProviders";
 import './globals.css'
+import RoutePrefetcher from "@/components/RoutePrefetcher";
 
 export const metadata: Metadata = {
   title: 'Nagpur Properties | Buy, Sell & Rent Properties in Nagpur',
@@ -72,6 +73,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppProviders>
+          <RoutePrefetcher/>
           {children}
         </AppProviders>
       </body>

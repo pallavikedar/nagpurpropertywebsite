@@ -1,724 +1,8 @@
-// // import { Button } from "@/components/ui/button"
-// // import { Input } from "@/components/ui/input"
-// // import { Label } from "@/components/ui/label"
-// // import { Textarea } from "@/components/ui/textarea"
-// // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// // import { Separator } from "@/components/ui/separator"
-// // import Navbar from "@/components/navbar"
-// // import Footer from "@/components/footer"
-
-// // export default function AddPropertyPage() {
-// //   return (
-// //     <div className="min-h-screen flex flex-col">
-// //       <Navbar />
-// //       <main className="flex-1">
-// //         <section className="bg-muted py-12">
-// //           <div className="container px-4 md:px-6">
-// //             <div className="max-w-3xl mx-auto text-center">
-// //               <h1 className="text-3xl font-bold tracking-tight mb-2">Add Your Property</h1>
-// //               <p className="text-muted-foreground">List your property for sale or rent on Nagpur Properties</p>
-// //             </div>
-// //           </div>
-// //         </section>
-
-// //         <section className="py-12">
-// //           <div className="container px-4 md:px-6">
-// //             <div className="max-w-3xl mx-auto">
-// //               <form className="space-y-8">
-// //                 <div className="bg-white p-6 rounded-lg shadow-sm border">
-// //                   <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
-// //                   <div className="space-y-4">
-// //                     <div className="grid gap-2">
-// //                       <Label htmlFor="title">Property Title</Label>
-// //                       <Input id="title" placeholder="Enter a descriptive title for your property" />
-// //                     </div>
-
-// //                     <div className="grid gap-2">
-// //                       <Label htmlFor="description">Property Description</Label>
-// //                       <Textarea id="description" placeholder="Describe your property in detail" rows={5} />
-// //                     </div>
-
-// //                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="type">Property For</Label>
-// //                         <Select>
-// //                           <SelectTrigger id="type">
-// //                             <SelectValue placeholder="Select option" />
-// //                           </SelectTrigger>
-// //                           <SelectContent>
-// //                             <SelectItem value="sale">Sale</SelectItem>
-// //                             <SelectItem value="rent">Rent</SelectItem>
-// //                           </SelectContent>
-// //                         </Select>
-// //                       </div>
-
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="category">Property Type</Label>
-// //                         <Select>
-// //                           <SelectTrigger id="category">
-// //                             <SelectValue placeholder="Select type" />
-// //                           </SelectTrigger>
-// //                           <SelectContent>
-// //                             <SelectItem value="apartment">Apartment</SelectItem>
-// //                             <SelectItem value="house">House</SelectItem>
-// //                             <SelectItem value="villa">Villa</SelectItem>
-// //                             <SelectItem value="plot">Plot</SelectItem>
-// //                             <SelectItem value="commercial">Commercial</SelectItem>
-// //                           </SelectContent>
-// //                         </Select>
-// //                       </div>
-// //                     </div>
-
-// //                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="price">Price (₹)</Label>
-// //                         <Input id="price" type="number" placeholder="Enter price" />
-// //                       </div>
-
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="area">Area (sq.ft)</Label>
-// //                         <Input id="area" type="number" placeholder="Enter area" />
-// //                       </div>
-// //                     </div>
-// //                   </div>
-// //                 </div>
-
-// //                 <div className="bg-white p-6 rounded-lg shadow-sm border">
-// //                   <h2 className="text-xl font-semibold mb-4">Property Details</h2>
-// //                   <div className="space-y-4">
-// //                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="bedrooms">Bedrooms</Label>
-// //                         <Select>
-// //                           <SelectTrigger id="bedrooms">
-// //                             <SelectValue placeholder="Select" />
-// //                           </SelectTrigger>
-// //                           <SelectContent>
-// //                             {[1, 2, 3, 4, 5, "5+"].map((num) => (
-// //                               <SelectItem key={num} value={String(num)}>
-// //                                 {num}
-// //                               </SelectItem>
-// //                             ))}
-// //                           </SelectContent>
-// //                         </Select>
-// //                       </div>
-
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="bathrooms">Bathrooms</Label>
-// //                         <Select>
-// //                           <SelectTrigger id="bathrooms">
-// //                             <SelectValue placeholder="Select" />
-// //                           </SelectTrigger>
-// //                           <SelectContent>
-// //                             {[1, 2, 3, 4, 5, "5+"].map((num) => (
-// //                               <SelectItem key={num} value={String(num)}>
-// //                                 {num}
-// //                               </SelectItem>
-// //                             ))}
-// //                           </SelectContent>
-// //                         </Select>
-// //                       </div>
-
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="furnishing">Furnishing</Label>
-// //                         <Select>
-// //                           <SelectTrigger id="furnishing">
-// //                             <SelectValue placeholder="Select" />
-// //                           </SelectTrigger>
-// //                           <SelectContent>
-// //                             <SelectItem value="unfurnished">Unfurnished</SelectItem>
-// //                             <SelectItem value="semi-furnished">Semi-Furnished</SelectItem>
-// //                             <SelectItem value="fully-furnished">Fully Furnished</SelectItem>
-// //                           </SelectContent>
-// //                         </Select>
-// //                       </div>
-// //                     </div>
-
-// //                     <div className="grid gap-2">
-// //                       <Label>Amenities</Label>
-// //                       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-// //                         {[
-// //                           "Parking",
-// //                           "Lift",
-// //                           "Power Backup",
-// //                           "Security",
-// //                           "Garden",
-// //                           "Swimming Pool",
-// //                           "Gym",
-// //                           "Club House",
-// //                           "Children's Play Area",
-// //                         ].map((amenity) => (
-// //                           <label key={amenity} className="flex items-center space-x-2">
-// //                             <input
-// //                               type="checkbox"
-// //                               className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-// //                             />
-// //                             <span>{amenity}</span>
-// //                           </label>
-// //                         ))}
-// //                       </div>
-// //                     </div>
-// //                   </div>
-// //                 </div>
-
-// //                 <div className="bg-white p-6 rounded-lg shadow-sm border">
-// //                   <h2 className="text-xl font-semibold mb-4">Location Information</h2>
-// //                   <div className="space-y-4">
-// //                     <div className="grid gap-2">
-// //                       <Label htmlFor="address">Address</Label>
-// //                       <Textarea id="address" placeholder="Enter complete property address" rows={2} />
-// //                     </div>
-
-// //                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="locality">Locality/Area</Label>
-// //                         <Input id="locality" placeholder="Enter locality" />
-// //                       </div>
-
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="city">City</Label>
-// //                         <Input id="city" placeholder="Enter city" defaultValue="Nagpur" />
-// //                       </div>
-// //                     </div>
-
-// //                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="state">State</Label>
-// //                         <Input id="state" placeholder="Enter state" defaultValue="Maharashtra" />
-// //                       </div>
-
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="pincode">Pincode</Label>
-// //                         <Input id="pincode" placeholder="Enter pincode" />
-// //                       </div>
-// //                     </div>
-// //                   </div>
-// //                 </div>
-
-// //                 <div className="bg-white p-6 rounded-lg shadow-sm border">
-// //                   <h2 className="text-xl font-semibold mb-4">Property Images</h2>
-// //                   <div className="space-y-4">
-// //                     <div className="grid gap-2">
-// //                       <Label htmlFor="images">Upload Images</Label>
-// //                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-// //                         <div className="space-y-2">
-// //                           <div className="text-muted-foreground">Drag and drop images here or click to browse</div>
-// //                           <Button variant="outline" size="sm">
-// //                             Browse Files
-// //                           </Button>
-// //                           <input id="images" type="file" multiple className="hidden" />
-// //                           <div className="text-xs text-muted-foreground">
-// //                             Upload up to 10 images (JPEG, PNG, max 5MB each)
-// //                           </div>
-// //                         </div>
-// //                       </div>
-// //                     </div>
-// //                   </div>
-// //                 </div>
-
-// //                 <div className="bg-white p-6 rounded-lg shadow-sm border">
-// //                   <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
-// //                   <div className="space-y-4">
-// //                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="owner-name">Owner/Agent Name</Label>
-// //                         <Input id="owner-name" placeholder="Enter name" />
-// //                       </div>
-
-// //                       <div className="grid gap-2">
-// //                         <Label htmlFor="owner-phone">Phone Number</Label>
-// //                         <Input id="owner-phone" placeholder="Enter phone number" />
-// //                       </div>
-// //                     </div>
-
-// //                     <div className="grid gap-2">
-// //                       <Label htmlFor="owner-email">Email Address</Label>
-// //                       <Input id="owner-email" type="email" placeholder="Enter email address" />
-// //                     </div>
-// //                   </div>
-// //                 </div>
-
-// //                 <Separator />
-
-// //                 <div className="flex flex-col gap-2">
-// //                   <label className="flex items-center space-x-2">
-// //                     <input
-// //                       type="checkbox"
-// //                       className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-// //                     />
-// //                     <span>
-// //                       I confirm that the information provided is accurate and I have the authority to list this property
-// //                     </span>
-// //                   </label>
-
-// //                   <Button type="submit" size="lg" className="mt-4">
-// //                     Submit Property
-// //                   </Button>
-// //                 </div>
-// //               </form>
-// //             </div>
-// //           </div>
-// //         </section>
-// //       </main>
-// //       <Footer />
-// //     </div>
-// //   )
-// // }
-
-// "use client"
-// import { useState } from "react"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Label } from "@/components/ui/label"
-// import { Textarea } from "@/components/ui/textarea"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { Separator } from "@/components/ui/separator"
-// import Navbar from "@/components/navbar"
-// import Footer from "@/components/footer"
-
-
-// export default function AddPropertyPage() {
-//   const [formData, setFormData] = useState({
-//     title: '',
-//     description: '',
-//     type: '',
-//     category: '',
-//     price: '',
-//     area: '',
-//     bedrooms: '',
-//     bathrooms: '',
-//     furnishing: '',
-//     amenities: [] as string[],
-//     address: '',
-//     locality: '',
-//     city: 'Nagpur',
-//     state: 'Maharashtra',
-//     pincode: '',
-//     ownerName: '',
-//     ownerPhone: '',
-//     ownerEmail: '',
-//     termsAgreed: false
-//   });
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-//     const { id, value } = e.target;
-//     setFormData(prev => ({
-//       ...prev,
-//       [id]: value
-//     }));
-//   };
-
-//   const handleSelectChange = (id: string, value: string) => {
-//     setFormData(prev => ({
-//       ...prev,
-//       [id]: value
-//     }));
-//   };
-
-//   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, checked } = e.target;
-//     if (name === 'termsAgreed') {
-//       setFormData(prev => ({
-//         ...prev,
-//         termsAgreed: checked
-//       }));
-//     } else {
-//       setFormData(prev => {
-//         const amenities = checked
-//           ? [...prev.amenities, name]
-//           : prev.amenities.filter(item => item !== name);
-//         return {
-//           ...prev,
-//           amenities
-//         };
-//       });
-//     }
-//   };
-
-//   const handleSubmit = (e: React.FormEvent) => {
-//     e.preventDefault();
-  
-//     // Check if the user is logged in
-//     const isLoggedIn = localStorage.getItem('token'); // Example: Check for a token in localStorage
-//     if (!isLoggedIn) {
-//       alert('You need to log in to submit a property.');
-//       window.location.href = '/user/Login'; // Redirect to the login page
-//       return;
-//     }
-  
-//     if (!formData.termsAgreed) {
-//       alert('Please agree to the terms before submitting');
-//       return;
-//     }
-  
-//     // Get existing properties from localStorage or initialize empty array
-//     const existingProperties = JSON.parse(localStorage.getItem('properties') || '[]');
-  
-//     // Create new property object with current date
-//     const newProperty = {
-//       ...formData,
-//       id: Date.now().toString(), // Generate unique ID
-//       date: new Date().toISOString(),
-//     };
-  
-//     // Add new property to the array
-//     const updatedProperties = [...existingProperties, newProperty];
-  
-//     // Save back to localStorage
-//     localStorage.setItem('properties', JSON.stringify(updatedProperties));
-  
-//     // Reset form
-//     setFormData({
-//       title: '',
-//       description: '',
-//       type: '',
-//       category: '',
-//       price: '',
-//       area: '',
-//       bedrooms: '',
-//       bathrooms: '',
-//       furnishing: '',
-//       amenities: [],
-//       address: '',
-//       locality: '',
-//       city: 'Nagpur',
-//       state: 'Maharashtra',
-//       pincode: '',
-//       ownerName: '',
-//       ownerPhone: '',
-//       ownerEmail: '',
-//       termsAgreed: false,
-//     });
-  
-//     alert('Property submitted successfully!');
-//   };
-
-//   return (
-//     <div className="min-h-screen flex flex-col">
-//       <Navbar />
-//       <main className="flex-1">
-//         <section className="bg-muted py-12">
-//           <div className="container px-4 md:px-6">
-//             <div className="max-w-3xl mx-auto text-center">
-//               <h1 className="text-3xl font-bold tracking-tight mb-2">Add Your Property</h1>
-//               <p className="text-muted-foreground">List your property for sale or rent on Nagpur Properties</p>
-//             </div>
-//           </div>
-//         </section>
-
-//         <section className="py-12">
-//           <div className="container px-4 md:px-6">
-//             <div className="max-w-3xl mx-auto">
-//               <form className="space-y-8" onSubmit={handleSubmit}>
-//                 <div className="bg-white p-6 rounded-lg shadow-sm border">
-//                   <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
-//                   <div className="space-y-4">
-//                     <div className="grid gap-2">
-//                       <Label htmlFor="title">Property Title</Label>
-//                       <Input 
-//                         id="title" 
-//                         placeholder="Enter a descriptive title for your property" 
-//                         value={formData.title}
-//                         onChange={handleChange}
-//                         required
-//                       />
-//                     </div>
-
-//                     <div className="grid gap-2">
-//                       <Label htmlFor="description">Property Description</Label>
-//                       <Textarea 
-//                         id="description" 
-//                         placeholder="Describe your property in detail" 
-//                         rows={5} 
-//                         value={formData.description}
-//                         onChange={handleChange}
-//                         required
-//                       />
-//                     </div>
-
-//                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="type">Property For</Label>
-//                         <Select onValueChange={(value) => handleSelectChange('type', value)} value={formData.type}>
-//                           <SelectTrigger id="type">
-//                             <SelectValue placeholder="Select option" />
-//                           </SelectTrigger>
-//                           <SelectContent>
-//                             <SelectItem value="sale">Sale</SelectItem>
-//                             <SelectItem value="rent">Rent</SelectItem>
-//                           </SelectContent>
-//                         </Select>
-//                       </div>
-
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="category">Property Type</Label>
-//                         <Select onValueChange={(value) => handleSelectChange('category', value)} value={formData.category}>
-//                           <SelectTrigger id="category">
-//                             <SelectValue placeholder="Select type" />
-//                           </SelectTrigger>
-//                           <SelectContent>
-//                             <SelectItem value="apartment">Apartment</SelectItem>
-//                             <SelectItem value="house">House</SelectItem>
-//                             <SelectItem value="villa">Villa</SelectItem>
-//                             <SelectItem value="plot">Plot</SelectItem>
-//                             <SelectItem value="commercial">Commercial</SelectItem>
-//                           </SelectContent>
-//                         </Select>
-//                       </div>
-//                     </div>
-
-//                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="price">Price (₹)</Label>
-//                         <Input 
-//                           id="price" 
-//                           type="number" 
-//                           placeholder="Enter price" 
-//                           value={formData.price}
-//                           onChange={handleChange}
-//                           required
-//                         />
-//                       </div>
-
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="area">Area (sq.ft)</Label>
-//                         <Input 
-//                           id="area" 
-//                           type="number" 
-//                           placeholder="Enter area" 
-//                           value={formData.area}
-//                           onChange={handleChange}
-//                           required
-//                         />
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 <div className="bg-white p-6 rounded-lg shadow-sm border">
-//                   <h2 className="text-xl font-semibold mb-4">Property Details</h2>
-//                   <div className="space-y-4">
-//                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="bedrooms">Bedrooms</Label>
-//                         <Select onValueChange={(value) => handleSelectChange('bedrooms', value)} value={formData.bedrooms}>
-//                           <SelectTrigger id="bedrooms">
-//                             <SelectValue placeholder="Select" />
-//                           </SelectTrigger>
-//                           <SelectContent>
-//                             {[1, 2, 3, 4, 5, "5+"].map((num) => (
-//                               <SelectItem key={num} value={String(num)}>
-//                                 {num}
-//                               </SelectItem>
-//                             ))}
-//                           </SelectContent>
-//                         </Select>
-//                       </div>
-
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="bathrooms">Bathrooms</Label>
-//                         <Select onValueChange={(value) => handleSelectChange('bathrooms', value)} value={formData.bathrooms}>
-//                           <SelectTrigger id="bathrooms">
-//                             <SelectValue placeholder="Select" />
-//                           </SelectTrigger>
-//                           <SelectContent>
-//                             {[1, 2, 3, 4, 5, "5+"].map((num) => (
-//                               <SelectItem key={num} value={String(num)}>
-//                                 {num}
-//                               </SelectItem>
-//                             ))}
-//                           </SelectContent>
-//                         </Select>
-//                       </div>
-
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="furnishing">Furnishing</Label>
-//                         <Select onValueChange={(value) => handleSelectChange('furnishing', value)} value={formData.furnishing}>
-//                           <SelectTrigger id="furnishing">
-//                             <SelectValue placeholder="Select" />
-//                           </SelectTrigger>
-//                           <SelectContent>
-//                             <SelectItem value="unfurnished">Unfurnished</SelectItem>
-//                             <SelectItem value="semi-furnished">Semi-Furnished</SelectItem>
-//                             <SelectItem value="fully-furnished">Fully Furnished</SelectItem>
-//                           </SelectContent>
-//                         </Select>
-//                       </div>
-//                     </div>
-
-//                     <div className="grid gap-2">
-//                       <Label>Amenities</Label>
-//                       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-//                         {[
-//                           "Parking",
-//                           "Lift",
-//                           "Power Backup",
-//                           "Security",
-//                           "Garden",
-//                           "Swimming Pool",
-//                           "Gym",
-//                           "Club House",
-//                           "Children's Play Area",
-//                         ].map((amenity) => (
-//                           <label key={amenity} className="flex items-center space-x-2">
-//                             <input
-//                               type="checkbox"
-//                               name={amenity}
-//                               checked={formData.amenities.includes(amenity)}
-//                               onChange={handleCheckboxChange}
-//                               className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-//                             />
-//                             <span>{amenity}</span>
-//                           </label>
-//                         ))}
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 <div className="bg-white p-6 rounded-lg shadow-sm border">
-//                   <h2 className="text-xl font-semibold mb-4">Location Information</h2>
-//                   <div className="space-y-4">
-//                     <div className="grid gap-2">
-//                       <Label htmlFor="address">Address</Label>
-//                       <Textarea 
-//                         id="address" 
-//                         placeholder="Enter complete property address" 
-//                         rows={2} 
-//                         value={formData.address}
-//                         onChange={handleChange}
-//                         required
-//                       />
-//                     </div>
-
-//                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="locality">Locality/Area</Label>
-//                         <Input 
-//                           id="locality" 
-//                           placeholder="Enter locality" 
-//                           value={formData.locality}
-//                           onChange={handleChange}
-//                           required
-//                         />
-//                       </div>
-
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="city">City</Label>
-//                         <Input 
-//                           id="city" 
-//                           placeholder="Enter city" 
-//                           value={formData.city}
-//                           onChange={handleChange}
-//                           required
-//                         />
-//                       </div>
-//                     </div>
-
-//                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="state">State</Label>
-//                         <Input 
-//                           id="state" 
-//                           placeholder="Enter state" 
-//                           value={formData.state}
-//                           onChange={handleChange}
-//                           required
-//                         />
-//                       </div>
-
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="pincode">Pincode</Label>
-//                         <Input 
-//                           id="pincode" 
-//                           placeholder="Enter pincode" 
-//                           value={formData.pincode}
-//                           onChange={handleChange}
-//                           required
-//                         />
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 <div className="bg-white p-6 rounded-lg shadow-sm border">
-//                   <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
-//                   <div className="space-y-4">
-//                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="ownerName">Owner/Agent Name</Label>
-//                         <Input 
-//                           id="ownerName" 
-//                           placeholder="Enter name" 
-//                           value={formData.ownerName}
-//                           onChange={handleChange}
-//                           required
-//                         />
-//                       </div>
-
-//                       <div className="grid gap-2">
-//                         <Label htmlFor="ownerPhone">Phone Number</Label>
-//                         <Input 
-//                           id="ownerPhone" 
-//                           placeholder="Enter phone number" 
-//                           value={formData.ownerPhone}
-//                           onChange={handleChange}
-//                           required
-//                         />
-//                       </div>
-//                     </div>
-
-//                     <div className="grid gap-2">
-//                       <Label htmlFor="ownerEmail">Email Address</Label>
-//                       <Input 
-//                         id="ownerEmail" 
-//                         type="email" 
-//                         placeholder="Enter email address" 
-//                         value={formData.ownerEmail}
-//                         onChange={handleChange}
-//                         required
-//                       />
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 <Separator />
-
-//                 <div className="flex flex-col gap-2">
-//                   <label className="flex items-center space-x-2">
-//                     <input
-//                       type="checkbox"
-//                       name="termsAgreed"
-//                       checked={formData.termsAgreed}
-//                       onChange={handleCheckboxChange}
-//                       className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-//                       required
-//                     />
-//                     <span>
-//                       I confirm that the information provided is accurate and I have the authority to list this property
-//                     </span>
-//                   </label>
-
-//                   <Button type="submit" size="lg" className="mt-4">
-//                     Submit Property
-//                   </Button>
-//                 </div>
-//               </form>
-//             </div>
-//           </div>
-//         </section>
-//       </main>
-//       <Footer />
-//     </div>
-//   )
-// }
-
-
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Building,
@@ -727,6 +11,22 @@ import {
   Settings,
   LogOut,
   Upload,
+  X,
+  Image as ImageIcon,
+  CheckCircle,
+  AlertCircle,
+  ArrowLeft,
+  Save,
+  Eye,
+  Home,
+  MapPin,
+  DollarSign,
+  Bed,
+  Bath,
+  Square,
+  Phone,
+  Mail,
+  User,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -740,31 +40,103 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import Footer from "@/components/footer";
 import { useLanguage } from "@/context/language-context";
 import { BASE_URL } from "../../baseurl";
 import { useRouter } from "next/navigation";
+import AdminSidebar from "@/components/admin-sidebar";
 
 /* ------------------ Reusable Section Card ------------------ */
-const SectionCard = ({ title, children }: any) => (
-  <div className="bg-white rounded-xl border shadow-sm p-6 space-y-4">
-    <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-    {children}
+const SectionCard = ({ title, icon: Icon, children, delay = 0 }: any) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay }}
+    className="bg-white rounded-xl border shadow-sm overflow-hidden"
+  >
+    <div className="px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
+      <div className="flex items-center gap-2">
+        {Icon && <Icon className="h-5 w-5 text-primary" />}
+        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+      </div>
+    </div>
+    <div className="p-6 space-y-4">
+      {children}
+    </div>
+  </motion.div>
+);
+
+/* ------------------ Input Components ------------------ */
+const InputBlock = ({ label, id, type = "text", required = false, value, onChange, placeholder }: any) => (
+  <div>
+    <Label className="text-gray-700 font-medium mb-2 block">
+      {label} {required && <span className="text-red-500">*</span>}
+    </Label>
+    <Input
+      id={id}
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="focus:ring-2 focus:ring-primary/20 transition-all"
+      required={required}
+    />
+  </div>
+);
+
+const TextareaBlock = ({ label, id, required = false, value, onChange, placeholder }: any) => (
+  <div>
+    <Label className="text-gray-700 font-medium mb-2 block">
+      {label} {required && <span className="text-red-500">*</span>}
+    </Label>
+    <Textarea
+      id={id}
+      rows={4}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+      required={required}
+    />
+  </div>
+);
+
+const SelectBlock = ({ label, options, value, onChange, required = false, placeholder }: any) => (
+  <div>
+    <Label className="text-gray-700 font-medium mb-2 block">
+      {label} {required && <span className="text-red-500">*</span>}
+    </Label>
+    <Select onValueChange={onChange} value={value}>
+      <SelectTrigger className="focus:ring-2 focus:ring-primary/20">
+        <SelectValue placeholder={placeholder || "Select an option"} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o: string) => (
+          <SelectItem key={o} value={o}>
+            {o}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   </div>
 );
 
 export default function AddPropertyPage() {
-    const router =useRouter()
+  const router = useRouter();
   const { translations: t } = useLanguage();
   const amenities = t.amenities || [];
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [activeTab, setActiveTab] = useState("basic");
+  const [imagePreviews, setImagePreviews] = useState([]);
 
-  const [images, setImages] = useState<File[]>([]);
-  const [formData, setFormData] = useState<any>({
+  const [images, setImages] = useState([]);
+  const [formData, setFormData] = useState({
     title: "",
     description: "",
     propertyFor: "",
@@ -787,31 +159,61 @@ export default function AddPropertyPage() {
   });
 
   /* ------------------ Handlers ------------------ */
-  const handleChange = (e: any) =>
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.id]: e.target.value });
 
-  const handleSelect = (key: string, value: string) =>
+  const handleSelect = (key, value) =>
     setFormData({ ...formData, [key]: value });
 
-  const toggleAmenity = (key: string) => {
-    setFormData((prev: any) => ({
+  const toggleAmenity = (key) => {
+    setFormData((prev) => ({
       ...prev,
       amenities: prev.amenities.includes(key)
-        ? prev.amenities.filter((a: string) => a !== key)
+        ? prev.amenities.filter((a) => a !== key)
         : [...prev.amenities, key],
     }));
   };
 
-  const handleImageChange = (e: any) => {
-    if (e.target.files) setImages(Array.from(e.target.files));
+  const handleImageChange = (e) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setImages(files);
+      
+      // Create preview URLs
+      const previews = files.map(file => URL.createObjectURL(file));
+      setImagePreviews(previews);
+    }
+  };
+
+  const removeImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    URL.revokeObjectURL(imagePreviews[index]);
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   /* ------------------ Submit ------------------ */
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
+
+    // Validation
+    if (!formData.title) {
+      setError("Please enter property title");
+      setLoading(false);
+      return;
+    }
+    if (!formData.propertyFor) {
+      setError("Please select property purpose");
+      setLoading(false);
+      return;
+    }
+    if (images.length === 0) {
+      setError("Please upload at least one property image");
+      setLoading(false);
+      return;
+    }
 
     try {
       const token =
@@ -819,7 +221,7 @@ export default function AddPropertyPage() {
         localStorage.getItem("admintoken");
 
       if (!token) {
-        window.location.href = "/Login";
+        router.push("/Login");
         return;
       }
 
@@ -852,207 +254,438 @@ export default function AddPropertyPage() {
       if (!res.ok) throw new Error("Failed to submit property");
 
       setSuccess("Property added successfully!");
-    } catch (err: any) {
+      
+      // Reset form after 2 seconds
+      setTimeout(() => {
+        setFormData({
+          title: "",
+          description: "",
+          propertyFor: "",
+          propertyType: "",
+          price: "",
+          area: "",
+          bedrooms: "",
+          bathrooms: "",
+          furnishing: "",
+          amenities: [],
+          address: "",
+          locality: "",
+          city: "",
+          state: "",
+          pincode: "",
+          ownerName: "",
+          ownerPhone: "",
+          ownerEmail: "",
+          status: "ACCEPTED",
+        });
+        setImages([]);
+        setImagePreviews([]);
+      }, 2000);
+      
+    } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-  const handleclick = () => {
-    localStorage.removeItem("token")
-    router.push("/Login"); 
-    
- }
 
-  /* ------------------ Layout ------------------ */
+  const sections = [
+    { id: "basic", label: "Basic Info", icon: Home },
+    { id: "details", label: "Property Details", icon: Building },
+    { id: "location", label: "Location", icon: MapPin },
+    { id: "contact", label: "Contact", icon: User },
+  ];
+
   return (
-    <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <div className="hidden md:flex w-64 flex-col fixed inset-y-0 bg-white border-r z-10">
-          <div className="p-4 border-b">
-            <Link href="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                Nagpur Properties
-              </span>
-            </Link>
+    <AdminSidebar>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="p-4 md:p-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                  Add New Property
+                </h1>
+                <p className="text-gray-500 mt-1">
+                  Fill in the details below to list a new property
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/admin/Properties")}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Properties
+              </Button>
+            </div>
           </div>
-          <div className="flex-1 py-6 px-4 space-y-1">
-            <Link
-              href="/admin"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md bg-muted text-primary font-medium"
-            >
-              <LayoutDashboard className="h-5 w-5" />
-              <span>Dashboard</span>
-            </Link>
-            <Link
-              href="/admin/Properties"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <Building className="h-5 w-5" />
-              <span>Properties</span>
-            </Link>
-            <Link
-              href="/admin/propertyEnquiry"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <Users className="h-5 w-5" />
-              <span>Enquiries</span>
-            </Link>
-            <Link
-              href="/admin/enquiries"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <Handshake  className="h-5 w-5" />
-              <span>Legal Consultancy Enquiry</span>
-            </Link>
-            <Link
-              href="/admin/getusers"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <Settings className="h-5 w-5" />
-              <span>Users</span>
-            </Link>
+
+          {/* Progress Steps */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between max-w-2xl">
+              {sections.map((section, index) => {
+                const Icon = section.icon;
+                const isActive = activeTab === section.id;
+                return (
+                  <div key={section.id} className="flex items-center">
+                    <button
+                      onClick={() => setActiveTab(section.id)}
+                      className={`flex flex-col items-center group transition-all ${
+                        isActive ? "scale-105" : ""
+                      }`}
+                    >
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                          isActive
+                            ? "bg-primary text-white shadow-lg"
+                            : "bg-gray-200 text-gray-500 group-hover:bg-gray-300"
+                        }`}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <span
+                        className={`text-xs mt-2 ${
+                          isActive ? "text-primary font-semibold" : "text-gray-500"
+                        }`}
+                      >
+                        {section.label}
+                      </span>
+                    </button>
+                    {index < sections.length - 1 && (
+                      <div className="w-12 h-px bg-gray-300 mx-2" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="p-4 border-t">
-            <button
-              className="flex items-center space-x-2 px-3 py-2 w-full rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              onClick={handleclick}
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
-            </button>
-          </div>
+
+          <form onSubmit={handleSubmit}>
+            {/* Basic Information */}
+            {activeTab === "basic" && (
+              <SectionCard title="Basic Information" icon={Home} delay={0.1}>
+                <InputBlock
+                  label="Property Title"
+                  id="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  placeholder="e.g., Luxurious 3BHK Apartment with Garden"
+                  required
+                />
+                
+                <TextareaBlock
+                  label="Property Description"
+                  id="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Describe your property in detail including features, nearby amenities, etc."
+                  required
+                />
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <SelectBlock
+                    label="Property For"
+                    options={["Sale", "Rent"]}
+                    value={formData.propertyFor}
+                    onChange={(v) => handleSelect("propertyFor", v)}
+                    required
+                    placeholder="Select purpose"
+                  />
+                  
+                  <SelectBlock
+                    label="Property Type"
+                    options={["Apartment", "Villa", "House", "Plot", "Commercial"]}
+                    value={formData.propertyType}
+                    onChange={(v) => handleSelect("propertyType", v)}
+                    required
+                    placeholder="Select type"
+                  />
+                </div>
+                
+                <SelectBlock
+                  label="Furnishing Status"
+                  options={["Fully Furnished", "Semi-Furnished", "Unfurnished"]}
+                  value={formData.furnishing}
+                  onChange={(v) => handleSelect("furnishing", v)}
+                  required
+                  placeholder="Select furnishing"
+                />
+                
+                <div className="flex justify-end pt-4">
+                  <Button type="button" onClick={() => setActiveTab("details")}>
+                    Next: Property Details
+                  </Button>
+                </div>
+              </SectionCard>
+            )}
+
+            {/* Property Details */}
+            {activeTab === "details" && (
+              <SectionCard title="Property Details" icon={Building} delay={0.2}>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <InputBlock
+                    label="Price (₹)"
+                    id="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={handleChange}
+                    placeholder="Enter price"
+                    required
+                  />
+                  
+                  <InputBlock
+                    label="Area (sq.ft)"
+                    id="area"
+                    type="number"
+                    value={formData.area}
+                    onChange={handleChange}
+                    placeholder="Enter area"
+                    required
+                  />
+                  
+                  <InputBlock
+                    label="Bedrooms"
+                    id="bedrooms"
+                    type="number"
+                    value={formData.bedrooms}
+                    onChange={handleChange}
+                    placeholder="Number of bedrooms"
+                    required
+                  />
+                  
+                  <InputBlock
+                    label="Bathrooms"
+                    id="bathrooms"
+                    type="number"
+                    value={formData.bathrooms}
+                    onChange={handleChange}
+                    placeholder="Number of bathrooms"
+                    required
+                  />
+                </div>
+
+                {/* Amenities */}
+                <div>
+                  <Label className="text-gray-700 font-medium mb-3 block">Amenities</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {amenities.map((a) => (
+                      <button
+                        type="button"
+                        key={a.key}
+                        onClick={() => toggleAmenity(a.key)}
+                        className={`px-4 py-2 rounded-full text-sm transition-all ${
+                          formData.amenities.includes(a.key)
+                            ? "bg-gradient-to-r from-primary to-primary/70 text-white shadow-md"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {a.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Property Images */}
+                <div>
+                  <Label className="text-gray-700 font-medium mb-3 block">Property Images</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label htmlFor="image-upload" className="cursor-pointer block">
+                      <Upload className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                      <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
+                      <p className="text-sm text-gray-500">PNG, JPG, JPEG up to 10MB each</p>
+                      <Button type="button" variant="outline" className="mt-4">
+                        Select Images
+                      </Button>
+                    </label>
+                  </div>
+                  
+                  {imagePreviews.length > 0 && (
+                    <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={preview}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-between pt-4">
+                  <Button type="button" variant="outline" onClick={() => setActiveTab("basic")}>
+                    Previous
+                  </Button>
+                  <Button type="button" onClick={() => setActiveTab("location")}>
+                    Next: Location Details
+                  </Button>
+                </div>
+              </SectionCard>
+            )}
+
+            {/* Location Information */}
+            {activeTab === "location" && (
+              <SectionCard title="Location Information" icon={MapPin} delay={0.3}>
+                <TextareaBlock
+                  label="Full Address"
+                  id="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="Enter complete property address"
+                  required
+                />
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <InputBlock
+                    label="Locality/Area"
+                    id="locality"
+                    value={formData.locality}
+                    onChange={handleChange}
+                    placeholder="Enter locality"
+                    required
+                  />
+                  
+                  <InputBlock
+                    label="City"
+                    id="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    placeholder="Enter city"
+                    required
+                  />
+                  
+                  <InputBlock
+                    label="State"
+                    id="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    placeholder="Enter state"
+                    required
+                  />
+                  
+                  <InputBlock
+                    label="Pincode"
+                    id="pincode"
+                    value={formData.pincode}
+                    onChange={handleChange}
+                    placeholder="Enter 6-digit pincode"
+                    required
+                  />
+                </div>
+                
+                <div className="flex justify-between pt-4">
+                  <Button type="button" variant="outline" onClick={() => setActiveTab("details")}>
+                    Previous
+                  </Button>
+                  <Button type="button" onClick={() => setActiveTab("contact")}>
+                    Next: Contact Details
+                  </Button>
+                </div>
+              </SectionCard>
+            )}
+
+            {/* Contact Information */}
+            {activeTab === "contact" && (
+              <SectionCard title="Contact Information" icon={User} delay={0.4}>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <InputBlock
+                    label="Owner/Agent Name"
+                    id="ownerName"
+                    value={formData.ownerName}
+                    onChange={handleChange}
+                    placeholder="Enter owner/agent name"
+                    required
+                  />
+                  
+                  <InputBlock
+                    label="Phone Number"
+                    id="ownerPhone"
+                    value={formData.ownerPhone}
+                    onChange={handleChange}
+                    placeholder="10-digit phone number"
+                    required
+                  />
+                  
+                  <InputBlock
+                    label="Email Address"
+                    id="ownerEmail"
+                    type="email"
+                    value={formData.ownerEmail}
+                    onChange={handleChange}
+                    placeholder="Enter email address"
+                    required
+                  />
+                </div>
+                
+                <div className="flex justify-between pt-4">
+                  <Button type="button" variant="outline" onClick={() => setActiveTab("location")}>
+                    Previous
+                  </Button>
+                  <Button type="submit" disabled={loading} className="bg-gradient-to-r from-primary to-primary/70">
+                    {loading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Submit Property
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </SectionCard>
+            )}
+          </form>
+
+          {/* Error/Success Messages */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2"
+              >
+                <AlertCircle className="h-5 w-5" />
+                {error}
+              </motion.div>
+            )}
+            
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2"
+              >
+                <CheckCircle className="h-5 w-5" />
+                {success}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-
-      {/* Main */}
-      <main className="ml-64 flex-1 bg-gray-50 p-8">
-        <form onSubmit={handleSubmit} className="space-y-8 max-w-6xl mx-auto">
-          <div>
-            <h1 className="text-3xl font-bold">Add Property</h1>
-            <p className="text-muted-foreground text-sm">
-              Fill all details carefully before submitting
-            </p>
-          </div>
-
-          {/* Basic Info */}
-          <SectionCard title="Basic Information">
-            <InputBlock label="Title" id="title" onChange={handleChange} />
-            <TextareaBlock
-              label="Description"
-              id="description"
-              onChange={handleChange}
-            />
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <SelectBlock
-                label="Property For"
-                options={["Sell", "Rent"]}
-                onChange={(v) => handleSelect("propertyFor", v)}
-              />
-              <SelectBlock
-                label="Property Type"
-                options={[
-                  "Apartment",
-                  "Villa",
-                  "House",
-                  "Plot",
-                  "Commercial",
-                ]}
-                onChange={(v) => handleSelect("propertyType", v)}
-              />
-            </div>
-          </SectionCard>
-
-          {/* Details */}
-          <SectionCard title="Property Details">
-            <div className="grid md:grid-cols-3 gap-4">
-              <InputBlock label="Price" id="price" type="number" />
-              <InputBlock label="Area (sqft)" id="area" type="number" />
-              <InputBlock label="Bedrooms" id="bedrooms" type="number" />
-              <InputBlock label="Bathrooms" id="bathrooms" type="number" />
-            </div>
-          </SectionCard>
-
-          {/* Amenities */}
-          <SectionCard title="Amenities">
-            <div className="flex flex-wrap gap-2">
-              {amenities.map((a: any) => (
-                <button
-                  type="button"
-                  key={a.key}
-                  onClick={() => toggleAmenity(a.key)}
-                  className={`px-3 py-1 rounded-full text-sm border ${
-                    formData.amenities.includes(a.key)
-                      ? "bg-primary text-white"
-                      : "bg-white"
-                  }`}
-                >
-                  {a.label}
-                </button>
-              ))}
-            </div>
-          </SectionCard>
-
-          {/* Images */}
-          <SectionCard title="Property Images">
-            <label className="border-dashed border-2 rounded-lg p-6 text-center block cursor-pointer">
-              <Upload className="mx-auto mb-2" />
-              Upload Images
-              <input
-                type="file"
-                multiple
-                className="hidden"
-                onChange={handleImageChange}
-              />
-            </label>
-          </SectionCard>
-
-          {error && <p className="text-red-500">{error}</p>}
-          {success && <p className="text-green-500">{success}</p>}
-        </form>
-
-        {/* Sticky Submit */}
-        <div className="fixed bottom-0 left-64 right-0 bg-white border-t p-4 flex justify-end">
-          <Button type="submit" onClick={handleSubmit} disabled={loading}>
-            {loading ? "Submitting..." : "Submit Property"}
-          </Button>
-        </div>
-      </main>
-
-    
-    </div>
+      </div>
+    </AdminSidebar>
   );
 }
-
-/* ------------------ Small UI Helpers ------------------ */
-const InputBlock = ({ label, id, type = "text", onChange }: any) => (
-  <div>
-    <Label>{label}</Label>
-    <Input id={id} type={type} onChange={onChange} />
-  </div>
-);
-
-const TextareaBlock = ({ label, id, onChange }: any) => (
-  <div>
-    <Label>{label}</Label>
-    <Textarea id={id} rows={4} onChange={onChange} />
-  </div>
-);
-
-const SelectBlock = ({ label, options, onChange }: any) => (
-  <div>
-    <Label>{label}</Label>
-    <Select onValueChange={onChange}>
-      <SelectTrigger>
-        <SelectValue placeholder="Select" />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((o: string) => (
-          <SelectItem key={o} value={o}>
-            {o}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-);

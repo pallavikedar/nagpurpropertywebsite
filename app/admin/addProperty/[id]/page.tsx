@@ -1,28 +1,47 @@
 "use client";
 import React from "react";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Save, 
+  Upload, 
+  X, 
+  AlertCircle, 
+  CheckCircle, 
+  ArrowLeft,
+  Home,
+  Building,
+  MapPin,
+  User,
+  Image as ImageIcon,
+  DollarSign,
+  Bed,
+  Bath,
+  Square,
+  Heart,
+  Shield,
+  Clock
+} from "lucide-react";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import {LanguageProvider, useLanguage } from "@/context/language-context";
+import { useLanguage } from "@/context/language-context";
 import { BASE_URL } from "../../../baseurl";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Building, Home, LayoutDashboard, ListFilter, LogOut, Plus, Settings, Users,Handshake  } from "lucide-react"
-export default function UpdatePropertyPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+import AdminSidebar from "@/components/admin-sidebar";
+
+export default function UpdatePropertyPage() {
   const { translations } = useLanguage();
   const t = translations;
   const amenitiesList = translations.amenities || [];
-
- const { id} = React.use(params);
+  const params = useParams();
+  const id = params?.id;
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -35,7 +54,7 @@ export default function UpdatePropertyPage({
     bedrooms: "",
     bathrooms: "",
     furnishing: "",
-    amenities: [] as string[],
+    amenities: [],
     address: "",
     locality: "",
     city: "",
@@ -47,11 +66,14 @@ export default function UpdatePropertyPage({
     status: "ACCEPTED",
   });
 
-  const [images, setImages] = useState<File[]>([]);
-  const [existingImages, setExistingImages] = useState<string[]>([]); // existing images
+  const [images, setImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("basic");
 
   // Fetch existing property data
   useEffect(() => {
@@ -95,24 +117,26 @@ export default function UpdatePropertyPage({
         });
 
         setExistingImages(data.images || []);
-      } catch (err: any) {
+      } catch (err) {
         setError(err.message || "Failed to load property.");
+      } finally {
+        setFetchLoading(false);
       }
     };
 
     if (id) fetchProperty();
-  }, [id]);
+  }, [id, router]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSelectChange = (id: string, value: string) => {
+  const handleSelectChange = (id, value) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
     setFormData((prev) => {
       const amenities = checked
@@ -122,11 +146,46 @@ export default function UpdatePropertyPage({
     });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) setImages(Array.from(e.target.files));
+  const handleImageChange = (e) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setImages(files);
+      
+      // Create preview URLs for new images
+      const previews = files.map(file => URL.createObjectURL(file));
+      setImagePreviews(previews);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const removeNewImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    URL.revokeObjectURL(imagePreviews[index]);
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = async (imageUrl) => {
+    if (!confirm("Remove this image?")) return;
+    
+    try {
+      const token = localStorage.getItem("admintoken");
+      const response = await fetch(`${BASE_URL}/property/${id}/remove-image`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ imageUrl }),
+      });
+      
+      if (response.ok) {
+        setExistingImages(prev => prev.filter(img => img !== imageUrl));
+      }
+    } catch (err) {
+      console.error("Failed to remove image", err);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -166,218 +225,563 @@ export default function UpdatePropertyPage({
       }
 
       setSuccess("Property updated successfully!");
-      setLoading(false);
-      router.push("/admin/Properties");
-    } catch (err: any) {
+      setTimeout(() => {
+        router.push("/admin/Properties");
+      }, 2000);
+    } catch (err) {
       setError(err.message || "Something went wrong.");
+    } finally {
       setLoading(false);
     }
   };
-const handleclick = () => {
-    localStorage.removeItem("token")
-    router.push("/Login"); 
-    
- }
+
+  const sections = [
+    { id: "basic", label: "Basic Info", icon: Home },
+    { id: "details", label: "Property Details", icon: Building },
+    { id: "location", label: "Location", icon: MapPin },
+    { id: "contact", label: "Contact", icon: User },
+  ];
+
+  if (fetchLoading) {
+    return (
+      <AdminSidebar>
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+            <p className="text-gray-500">Loading property data...</p>
+          </div>
+        </div>
+      </AdminSidebar>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col">
-         <div className="hidden md:flex w-64 flex-col fixed inset-y-0 bg-white border-r z-10">
-          <div className="p-4 border-b">
-            <Link href="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                Nagpur Properties
-              </span>
-            </Link>
+    <AdminSidebar>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="p-4 md:p-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                  Edit Property
+                </h1>
+                <p className="text-gray-500 mt-1">
+                  Update property information and manage images
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/admin/Properties")}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Properties
+              </Button>
+            </div>
           </div>
-          <div className="flex-1 py-6 px-4 space-y-1">
-            <Link
-              href="/admin"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md bg-muted text-primary font-medium"
-            >
-              <LayoutDashboard className="h-5 w-5" />
-              <span>Dashboard</span>
-            </Link>
-            <Link
-              href="/admin/Properties"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <Building className="h-5 w-5" />
-              <span>Properties</span>
-            </Link>
-            <Link
-              href="/admin/propertyEnquiry"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <Users className="h-5 w-5" />
-              <span>Enquiries</span>
-            </Link>
-            <Link
-              href="/admin/enquiries"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <Handshake  className="h-5 w-5" />
-              <span>Legal Consultancy Enquiry</span>
-            </Link>
-            <Link
-              href="/admin/getusers"
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <Settings className="h-5 w-5" />
-              <span>Users</span>
-            </Link>
-          </div>
-          <div className="p-4 border-t">
-            <button
-              className="flex items-center space-x-2 px-3 py-2 w-full rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              onClick={handleclick}
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
-      <main className="flex-1 py-12">
-        <div className="container px-4 md:px-6 max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">{t.EditProperty}</h1>
-          <form className="space-y-8" onSubmit={handleSubmit}>
-            {/* Basic Info */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h2 className="text-xl font-semibold mb-4">{t.BasicInformation}</h2>
-              <div className="grid gap-4">
-                <div>
-                  <Label htmlFor="title">{t.PropertyTitle}</Label>
-                  <Input id="title" value={formData.title} onChange={handleChange} required />
-                </div>
-                <div>
-                  <Label htmlFor="description">{t.PropertyDescription}</Label>
-                  <Textarea id="description" value={formData.description} onChange={handleChange} rows={5} required />
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>{t.PropertyFor}</Label>
-                    <Select value={formData.propertyFor} onValueChange={(v) => handleSelectChange("propertyFor", v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t.Selectoption} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Sale">{t.Sell}</SelectItem>
-                        <SelectItem value="Rent">{t.Rent}</SelectItem>
-                      </SelectContent>
-                    </Select>
+
+          {/* Progress Steps */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between max-w-2xl">
+              {sections.map((section, index) => {
+                const Icon = section.icon;
+                const isActive = activeTab === section.id;
+                return (
+                  <div key={section.id} className="flex items-center">
+                    <button
+                      onClick={() => setActiveTab(section.id)}
+                      className={`flex flex-col items-center group transition-all ${
+                        isActive ? "scale-105" : ""
+                      }`}
+                    >
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                          isActive
+                            ? "bg-primary text-white shadow-lg"
+                            : "bg-gray-200 text-gray-500 group-hover:bg-gray-300"
+                        }`}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <span
+                        className={`text-xs mt-2 ${
+                          isActive ? "text-primary font-semibold" : "text-gray-500"
+                        }`}
+                      >
+                        {section.label}
+                      </span>
+                    </button>
+                    {index < sections.length - 1 && (
+                      <div className="w-12 h-px bg-gray-300 mx-2" />
+                    )}
                   </div>
-                  <div>
-                    <Label>{t.PropertyType}</Label>
-                    <Select value={formData.propertyType} onValueChange={(v) => handleSelectChange("propertyType", v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Villa">{t.Villa}</SelectItem>
-                        <SelectItem value="Apartment">{t.Apartment}</SelectItem>
-                        <SelectItem value="House">{t.House}</SelectItem>
-                        <SelectItem value="Plot">{t.Plot}</SelectItem>
-                        <SelectItem value="Commercial">{t.Commercial}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                );
+              })}
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            {/* Basic Information */}
+            {activeTab === "basic" && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="bg-white rounded-xl shadow-sm border overflow-hidden"
+              >
+                <div className="px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
+                  <div className="flex items-center gap-2">
+                    <Home className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Price, area, rooms */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border grid md:grid-cols-2 gap-4">
-              <div>
-                <Label>Price</Label>
-                <Input type="number" id="price" value={formData.price} onChange={handleChange} required />
-              </div>
-              <div>
-                <Label>Area (sqft)</Label>
-                <Input type="number" id="area" value={formData.area} onChange={handleChange} required />
-              </div>
-              <div>
-                <Label>Bedrooms</Label>
-                <Input type="number" id="bedrooms" value={formData.bedrooms} onChange={handleChange} required />
-              </div>
-              <div>
-                <Label>Bathrooms</Label>
-                <Input type="number" id="bathrooms" value={formData.bathrooms} onChange={handleChange} required />
-              </div>
-              <div>
-                <Label>Furnishing</Label>
-                <Select value={formData.furnishing} onValueChange={(v) => handleSelectChange("furnishing", v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select furnishing" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Fully Furnished">{t.FullyFurnished}</SelectItem>
-                    <SelectItem value="Semi-Furnished">{t.SemiFurnished}</SelectItem>
-                    <SelectItem value="Unfurnished">{t.Unfurnished}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Amenities */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h2 className="text-xl font-semibold mb-4">{t.Amenities}</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {amenitiesList.map((amenity) => (
-                  <label key={amenity.key} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      name={amenity.key}
-                      checked={formData.amenities.includes(amenity.key)}
-                      onChange={handleCheckboxChange}
-                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                <div className="p-6 space-y-4">
+                  <div>
+                    <Label className="text-gray-700 font-medium mb-2 block">
+                      Property Title <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="Enter property title"
+                      className="focus:ring-2 focus:ring-primary/20"
+                      required
                     />
-                    <span>{amenity.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-gray-700 font-medium mb-2 block">
+                      Description <span className="text-red-500">*</span>
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      rows={5}
+                      placeholder="Describe the property in detail"
+                      className="focus:ring-2 focus:ring-primary/20 resize-none"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Property For</Label>
+                      <Select value={formData.propertyFor} onValueChange={(v) => handleSelectChange("propertyFor", v)}>
+                        <SelectTrigger className="focus:ring-2 focus:ring-primary/20">
+                          <SelectValue placeholder="Select option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Sale">For Sale</SelectItem>
+                          <SelectItem value="Rent">For Rent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Property Type</Label>
+                      <Select value={formData.propertyType} onValueChange={(v) => handleSelectChange("propertyType", v)}>
+                        <SelectTrigger className="focus:ring-2 focus:ring-primary/20">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Villa">Villa</SelectItem>
+                          <SelectItem value="Apartment">Apartment</SelectItem>
+                          <SelectItem value="House">House</SelectItem>
+                          <SelectItem value="Plot">Plot</SelectItem>
+                          <SelectItem value="Commercial">Commercial</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-            {/* Location & Contact */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <Label>Address</Label>
-              <Textarea id="address" value={formData.address} onChange={handleChange} rows={2} required />
-              <div className="grid md:grid-cols-2 gap-4 mt-2">
-                <Input id="locality" value={formData.locality} onChange={handleChange} placeholder="Locality" required />
-                <Input id="city" value={formData.city} onChange={handleChange} placeholder="City" required />
-                <Input id="state" value={formData.state} onChange={handleChange} placeholder="State" required />
-                <Input id="pincode" value={formData.pincode} onChange={handleChange} placeholder="Pincode" required />
-              </div>
-            </div>
+                  <div>
+                    <Label className="text-gray-700 font-medium mb-2 block">Status</Label>
+                    <Select value={formData.status} onValueChange={(v) => handleSelectChange("status", v)}>
+                      <SelectTrigger className="focus:ring-2 focus:ring-primary/20">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="PENDING">Pending</SelectItem>
+                        <SelectItem value="ACCEPTED">Accepted</SelectItem>
+                        <SelectItem value="REJECT">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <Label>Owner Name</Label>
-              <Input id="ownerName" value={formData.ownerName} onChange={handleChange} required />
-              <Label>Owner Phone</Label>
-              <Input id="ownerPhone" value={formData.ownerPhone} onChange={handleChange} required />
-              <Label>Owner Email</Label>
-              <Input id="ownerEmail" value={formData.ownerEmail} onChange={handleChange} required />
-            </div>
+                  <div className="flex justify-end pt-4">
+                    <Button type="button" onClick={() => setActiveTab("details")}>
+                      Next: Property Details
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
-            {/* Images */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <Label>Property Images (existing)</Label>
-              <div className="flex gap-2 mb-2 flex-wrap">
-                {existingImages.map((img, i) => (
-                  <img key={i} src={img} alt="property" className="w-24 h-24 object-cover rounded" />
-                ))}
-              </div>
-              <Label>Upload New Images</Label>
-              <input type="file" multiple accept="image/*" onChange={handleImageChange} />
-            </div>
+            {/* Property Details */}
+            {activeTab === "details" && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="bg-white rounded-xl shadow-sm border overflow-hidden"
+              >
+                <div className="px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
+                  <div className="flex items-center gap-2">
+                    <Building className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-semibold text-gray-900">Property Details</h2>
+                  </div>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Price (₹)</Label>
+                      <Input
+                        type="number"
+                        id="price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        placeholder="Enter price"
+                        className="focus:ring-2 focus:ring-primary/20"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Area (sq.ft)</Label>
+                      <Input
+                        type="number"
+                        id="area"
+                        value={formData.area}
+                        onChange={handleChange}
+                        placeholder="Enter area"
+                        className="focus:ring-2 focus:ring-primary/20"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Bedrooms</Label>
+                      <Input
+                        type="number"
+                        id="bedrooms"
+                        value={formData.bedrooms}
+                        onChange={handleChange}
+                        placeholder="Number of bedrooms"
+                        className="focus:ring-2 focus:ring-primary/20"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Bathrooms</Label>
+                      <Input
+                        type="number"
+                        id="bathrooms"
+                        value={formData.bathrooms}
+                        onChange={handleChange}
+                        placeholder="Number of bathrooms"
+                        className="focus:ring-2 focus:ring-primary/20"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Furnishing</Label>
+                      <Select value={formData.furnishing} onValueChange={(v) => handleSelectChange("furnishing", v)}>
+                        <SelectTrigger className="focus:ring-2 focus:ring-primary/20">
+                          <SelectValue placeholder="Select furnishing" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Fully Furnished">Fully Furnished</SelectItem>
+                          <SelectItem value="Semi-Furnished">Semi-Furnished</SelectItem>
+                          <SelectItem value="Unfurnished">Unfurnished</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-            {error && <p className="text-red-500">{error}</p>}
-            {success && <p className="text-green-500">{success}</p>}
+                  {/* Amenities */}
+                  <div>
+                    <Label className="text-gray-700 font-medium mb-3 block">Amenities</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {amenitiesList.map((amenity) => (
+                        <label key={amenity.key} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                          <input
+                            type="checkbox"
+                            name={amenity.key}
+                            checked={formData.amenities.includes(amenity.key)}
+                            onChange={handleCheckboxChange}
+                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                          <span className="text-gray-700">{amenity.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
 
-            <Button type="submit" size="lg" className="mt-4 w-full">
-              {loading ? "Updating..." : t.UpdateProperty}
-            </Button>
+                  {/* Existing Images Display */}
+                  {existingImages.length > 0 && (
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-3 block">Current Images</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {existingImages.map((img, i) => (
+                          <div key={i} className="relative group">
+                            <img
+                              src={img}
+                              alt={`Property ${i + 1}`}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeExistingImage(img)}
+                              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* New Images Upload */}
+                  <div>
+                    <Label className="text-gray-700 font-medium mb-3 block">Upload New Images</Label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <label htmlFor="image-upload" className="cursor-pointer block">
+                        <Upload className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                        <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
+                        <p className="text-sm text-gray-500">PNG, JPG, JPEG up to 10MB each</p>
+                        <Button type="button" variant="outline" className="mt-4">
+                          Select Images
+                        </Button>
+                      </label>
+                    </div>
+                    
+                    {imagePreviews.length > 0 && (
+                      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {imagePreviews.map((preview, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={preview}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeNewImage(index)}
+                              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between pt-4">
+                    <Button type="button" variant="outline" onClick={() => setActiveTab("basic")}>
+                      Previous
+                    </Button>
+                    <Button type="button" onClick={() => setActiveTab("location")}>
+                      Next: Location Details
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Location Information */}
+            {activeTab === "location" && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="bg-white rounded-xl shadow-sm border overflow-hidden"
+              >
+                <div className="px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-semibold text-gray-900">Location Information</h2>
+                  </div>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div>
+                    <Label className="text-gray-700 font-medium mb-2 block">Full Address</Label>
+                    <Textarea
+                      id="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      rows={2}
+                      placeholder="Enter complete address"
+                      className="focus:ring-2 focus:ring-primary/20"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Locality/Area</Label>
+                      <Input
+                        id="locality"
+                        value={formData.locality}
+                        onChange={handleChange}
+                        placeholder="Enter locality"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">City</Label>
+                      <Input
+                        id="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        placeholder="Enter city"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">State</Label>
+                      <Input
+                        id="state"
+                        value={formData.state}
+                        onChange={handleChange}
+                        placeholder="Enter state"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Pincode</Label>
+                      <Input
+                        id="pincode"
+                        value={formData.pincode}
+                        onChange={handleChange}
+                        placeholder="Enter 6-digit pincode"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between pt-4">
+                    <Button type="button" variant="outline" onClick={() => setActiveTab("details")}>
+                      Previous
+                    </Button>
+                    <Button type="button" onClick={() => setActiveTab("contact")}>
+                      Next: Contact Details
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Contact Information */}
+            {activeTab === "contact" && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="bg-white rounded-xl shadow-sm border overflow-hidden"
+              >
+                <div className="px-6 py-4 border-b bg-gradient-to-r from-gray-50 to-white">
+                  <div className="flex items-center gap-2">
+                    <User className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-semibold text-gray-900">Contact Information</h2>
+                  </div>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Owner/Agent Name</Label>
+                      <Input
+                        id="ownerName"
+                        value={formData.ownerName}
+                        onChange={handleChange}
+                        placeholder="Enter owner/agent name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-gray-700 font-medium mb-2 block">Phone Number</Label>
+                      <Input
+                        id="ownerPhone"
+                        value={formData.ownerPhone}
+                        onChange={handleChange}
+                        placeholder="10-digit phone number"
+                        required
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label className="text-gray-700 font-medium mb-2 block">Email Address</Label>
+                      <Input
+                        id="ownerEmail"
+                        type="email"
+                        value={formData.ownerEmail}
+                        onChange={handleChange}
+                        placeholder="Enter email address"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between pt-4">
+                    <Button type="button" variant="outline" onClick={() => setActiveTab("location")}>
+                      Previous
+                    </Button>
+                    <Button type="submit" disabled={loading} className="bg-gradient-to-r from-primary to-primary/70">
+                      {loading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                          Updating...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4 mr-2" />
+                          Update Property
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </form>
+
+          {/* Error/Success Messages */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50"
+              >
+                <AlertCircle className="h-5 w-5" />
+                {error}
+              </motion.div>
+            )}
+            
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50"
+              >
+                <CheckCircle className="h-5 w-5" />
+                {success}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </AdminSidebar>
   );
 }

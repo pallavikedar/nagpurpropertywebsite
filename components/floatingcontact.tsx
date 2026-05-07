@@ -8,7 +8,7 @@ export default function FloatingContact() {
       
       {/* WhatsApp */}
       <a
-        href="https://wa.me/919823388866" // replace with your number
+        href="https://wa.me/919494942894" // replace with your number
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center justify-center w-14 h-14 rounded-full bg-green-500 text-white shadow-lg hover:scale-110 transition"
@@ -19,7 +19,7 @@ export default function FloatingContact() {
 
       {/* Call */}
       <a
-        href="tel:+917888028866" // replace with your number
+        href="tel:+919494942894" // replace with your number
         className="flex items-center justify-center w-14 h-14 rounded-full bg-blue-600 text-white shadow-lg hover:scale-110 transition"
         aria-label="Call"
       >
