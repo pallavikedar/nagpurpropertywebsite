@@ -1,399 +1,53 @@
-// import Link from "next/link"
-// import { ChevronRight } from "lucide-react"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Label } from "@/components/ui/label"
-// import { Textarea } from "@/components/ui/textarea"
-// import Navbar from "@/components/navbar"
-// import Footer from "@/components/footer"
-// import { properties } from "@/lib/data"
-
-// export default function PropertyEnquiryPage({ params }: { params: { id: string } }) {
-//   // Ensure params.id is properly handled
-//   const propertyId = params?.id;
-
-//   // Fetch the property data based on the ID
-//   const property = properties.find((p) => p.id === propertyId);
-
-//   // Handle the case where the property is not found
-//   if (!property) {
-//     return (
-//       <div className="min-h-screen flex flex-col">
-//         <Navbar />
-//         <main className="flex-1 flex items-center justify-center">
-//           <h1 className="text-2xl font-bold">Property not found</h1>
-//         </main>
-//         <Footer />
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="min-h-screen flex flex-col">
-//       <Navbar />
-//       <main className="flex-1">
-//         {/* Breadcrumb */}
-//         <div className="bg-muted py-4">
-//           <div className="container px-4 md:px-6">
-//             <div className="flex items-center text-sm">
-//               <Link href="/" className="text-muted-foreground hover:text-foreground">
-//                 Home
-//               </Link>
-//               <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
-//               <Link href="/properties" className="text-muted-foreground hover:text-foreground">
-//                 Properties
-//               </Link>
-//               <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
-//               <Link
-//                 href={`/properties/${property.id}`}
-//                 className="text-muted-foreground hover:text-foreground truncate"
-//               >
-//                 {property.title}
-//               </Link>
-//               <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
-//               <span className="font-medium">Enquiry</span>
-//             </div>
-//           </div>
-//         </div>
-
-//         <section className="py-12">
-//           <div className="container px-4 md:px-6">
-//             <div className="max-w-3xl mx-auto">
-//               <div className="bg-white p-8 rounded-lg shadow-md border">
-//                 <h1 className="text-2xl font-bold mb-6">Enquire About This Property</h1>
-
-//                 <div className="mb-6 p-4 bg-muted/50 rounded-lg">
-//                   <h2 className="font-semibold">{property.title}</h2>
-//                   <p className="text-sm text-muted-foreground">{property.address}</p>
-//                   <p className="font-medium mt-2">
-//                     ₹{property.price.toLocaleString()}
-//                     {property.type === "rent" ? "/month" : ""}
-//                   </p>
-//                 </div>
-
-//                 <form className="space-y-4">
-//                   <div className="grid gap-2">
-//                     <Label htmlFor="name">Full Name</Label>
-//                     <Input id="name" placeholder="Enter your full name" />
-//                   </div>
-
-//                   <div className="grid gap-2">
-//                     <Label htmlFor="email">Email Address</Label>
-//                     <Input id="email" type="email" placeholder="Enter your email" />
-//                   </div>
-
-//                   <div className="grid gap-2">
-//                     <Label htmlFor="phone">Phone Number</Label>
-//                     <Input id="phone" placeholder="Enter your phone number" />
-//                   </div>
-
-//                   <div className="grid gap-2">
-//                     <Label htmlFor="message">Your Message</Label>
-//                     <Textarea
-//                       id="message"
-//                       placeholder="I'm interested in this property and would like to know more about..."
-//                       rows={4}
-//                       defaultValue={`I'm interested in ${property.title} and would like to know more details.`}
-//                     />
-//                   </div>
-
-//                   <div className="grid gap-2">
-//                     <Label htmlFor="visit">Preferred Visit Date (Optional)</Label>
-//                     <Input id="visit" type="date" />
-//                   </div>
-
-//                   <div className="flex items-center space-x-2">
-//                     <input
-//                       type="checkbox"
-//                       id="contact-preference"
-//                       className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-//                     />
-//                     <Label htmlFor="contact-preference" className="text-sm">
-//                       I prefer to be contacted via WhatsApp
-//                     </Label>
-//                   </div>
-
-//                   <div className="flex items-center space-x-2">
-//                     <input
-//                       type="checkbox"
-//                       id="terms"
-//                       className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-//                     />
-//                     <Label htmlFor="terms" className="text-sm">
-//                       I agree to the{" "}
-//                       <Link href="#" className="text-primary hover:underline">
-//                         terms and conditions
-//                       </Link>{" "}
-//                       and{" "}
-//                       <Link href="#" className="text-primary hover:underline">
-//                         privacy policy
-//                       </Link>
-//                     </Label>
-//                   </div>
-
-//                   <Button type="submit" className="w-full">
-//                     Submit Enquiry
-//                   </Button>
-//                 </form>
-
-//                 <div className="mt-6 text-center text-sm text-muted-foreground">
-//                   <p>Your information is secure and will only be used to contact you regarding this property.</p>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-//       </main>
-//       <Footer />
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import Link from "next/link";
-// import { ChevronRight } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Textarea } from "@/components/ui/textarea";
-// import Navbar from "@/components/navbar";
-// import Footer from "@/components/footer";
-// import { properties } from "@/lib/data";
-// import { BASE_URL } from "@/app/baseurl";
-// export default function PropertyEnquiryPage({ params }: { params: Promise<{ id: string }> }) {
-//   const [property, setProperty] = useState<any>(null);
-//   const [formData, setFormData] = useState({
-//     fullName: "",
-//     email: "",
-//     phone: "",
-//     message: "",
-//     visitDate: "",
-//   });
-//   const [error, setError] = useState("");
-//   const [success, setSuccess] = useState("");
-
-//   useEffect(() => {
-//     const fetchProperty = async () => {
-//       try {
-//         const resolvedParams = await params; // Unwrap the params Promise
-//         const propertyId = resolvedParams.id;
-//         const foundProperty = properties.find((p) => p.id === propertyId);
-//         setProperty(foundProperty || null); // Set the property or null if not found
-//       } catch (err) {
-//         console.error("Failed to resolve params:", err);
-//       }
-//     };
-
-//     fetchProperty();
-//   }, [params]);
-
-//   if (!property) {
-//     return (
-//       <div className="min-h-screen flex flex-col">
-//         <Navbar />
-//         <main className="flex-1 flex items-center justify-center">
-//           <h1 className="text-2xl font-bold">Property not found</h1>
-//         </main>
-//         <Footer />
-//       </div>
-//     );
-//   }
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-//     const { id, value } = e.target;
-//     setFormData((prev) => ({ ...prev, [id]: value }));
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setError("");
-//     setSuccess("");
-
-//     const payload = {
-//       ...formData,
-//       propertyId: property.id,
-//     };
-
-//     try {
-//       const response = await fetch(`${BASE_URL }/Property-enquiries`, {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(payload),
-//       });
-
-//       if (!response.ok) {
-//         throw new Error("Failed to submit enquiry. Please try again.");
-//       }
-
-//       setSuccess("Enquiry submitted successfully!");
-//       setFormData({
-//         fullName: "",
-//         email: "",
-//         phone: "",
-//         message: "",
-//         visitDate: "",
-//       });
-//     } catch (err: any) {
-//       setError(err.message || "Something went wrong. Please try again.");
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex flex-col">
-//       <Navbar />
-//       <main className="flex-1">
-//         <div className="bg-muted py-4">
-//           <div className="container px-4 md:px-6">
-//             <div className="flex items-center text-sm">
-//               <Link href="/" className="text-muted-foreground hover:text-foreground">
-//                 Home
-//               </Link>
-//               <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
-//               <Link href="/properties" className="text-muted-foreground hover:text-foreground">
-//                 Properties
-//               </Link>
-//               <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
-//               <span className="font-medium truncate">{property.title}</span>
-//             </div>
-//           </div>
-//         </div>
-
-//         <section className="py-12">
-//           <div className="container px-4 md:px-6">
-//             <div className="max-w-3xl mx-auto">
-//               <div className="bg-white p-8 rounded-lg shadow-md border">
-//                 <h1 className="text-2xl font-bold mb-6">Enquire About This Property</h1>
-
-//                 <div className="mb-6 p-4 bg-muted/50 rounded-lg">
-//                   <h2 className="font-semibold">{property.title}</h2>
-//                   <p className="text-sm text-muted-foreground">{property.address}</p>
-//                   <p className="font-medium mt-2">
-//                     ₹{property.price.toLocaleString()}
-//                     {property.type === "rent" ? "/month" : ""}
-//                   </p>
-//                 </div>
-
-//                 <form className="space-y-4" onSubmit={handleSubmit}>
-//                   <div className="grid gap-2">
-//                     <Label htmlFor="fullName">Full Name</Label>
-//                     <Input
-//                       id="fullName"
-//                       placeholder="Enter your full name"
-//                       value={formData.fullName}
-//                       onChange={handleChange}
-//                     />
-//                   </div>
-
-//                   <div className="grid gap-2">
-//                     <Label htmlFor="email">Email Address</Label>
-//                     <Input
-//                       id="email"
-//                       type="email"
-//                       placeholder="Enter your email"
-//                       value={formData.email}
-//                       onChange={handleChange}
-//                     />
-//                   </div>
-
-//                   <div className="grid gap-2">
-//                     <Label htmlFor="phone">Phone Number</Label>
-//                     <Input
-//                       id="phone"
-//                       placeholder="Enter your phone number"
-//                       value={formData.phone}
-//                       onChange={handleChange}
-//                     />
-//                   </div>
-
-//                   <div className="grid gap-2">
-//                     <Label htmlFor="message">Your Message</Label>
-//                     <Textarea
-//                       id="message"
-//                       placeholder="I'm interested in this property and would like to know more about..."
-//                       rows={4}
-//                       value={formData.message}
-//                       onChange={handleChange}
-//                     />
-//                   </div>
-
-//                   <div className="grid gap-2">
-//                     <Label htmlFor="visitDate">Preferred Visit Date (Optional)</Label>
-//                     <Input
-//                       id="visitDate"
-//                       type="date"
-//                       value={formData.visitDate}
-//                       onChange={handleChange}
-//                     />
-//                   </div>
-
-//                   {error && <p className="text-red-500">{error}</p>}
-//                   {success && <p className="text-green-500">{success}</p>}
-
-//                   <Button type="submit" className="w-full">
-//                     Submit Enquiry
-//                   </Button>
-//                 </form>
-//               </div>
-//             </div>
-//           </div>
-//         </section>
-//       </main>
-//       <Footer />
-//     </div>
-//   );
-// }
-
-
 "use client";
 
+import React from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, MapPin } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  ChevronRight, 
+  MapPin, 
+  Home, 
+  Building2, 
+  DollarSign, 
+  Bed, 
+  Bath, 
+  Square,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  MessageSquare,
+  Send,
+  CheckCircle,
+  AlertCircle,
+  ArrowLeft,
+  Heart,
+  Share2,
+  Clock
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { BASE_URL } from "@/app/baseurl";
 
-interface Property {
-  id: string;
-  title: string;
-  address: string;
-  price: number;
-  type: "rent" | "sale";
-  ownerName?: string;
-  category?: string;
-}
+// ✅ Only keep dynamic = 'force-dynamic', remove generateStaticParams
+export const dynamic = 'force-dynamic';
 
-export default function PropertyEnquiryPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  // ✅ SAFE PARAM ACCESS (Vercel compatible)
-  const propertyId = params.id;
-
-  // ✅ SAFE localStorage access
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("usertoken")
-      : null;
-
-  const [property, setProperty] = useState<Property | null>(null);
+export default function PropertyEnquiryPage({ params }) {
+  const router = useRouter();
+  const { id: propertyId } = React.use(params);
+  
+  const token = typeof window !== "undefined" ? localStorage.getItem("usertoken") : null;
+  
+  const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -404,52 +58,48 @@ export default function PropertyEnquiryPage({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // ✅ Fetch property
   useEffect(() => {
     if (!propertyId) return;
 
     const fetchPropertyById = async () => {
       try {
         setLoading(true);
-
         const res = await fetch(`${BASE_URL}/property/${propertyId}`, {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-          cache: "no-store", // ✅ prevents stale data on Vercel
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
+          cache: "no-store",
         });
-
         if (!res.ok) throw new Error("Failed to fetch property details.");
-
         const data = await res.json();
         setProperty(data);
-      } catch (err: any) {
-        console.error(err);
+      } catch (err) {
         setError(err.message || "Something went wrong.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchPropertyById();
   }, [propertyId, token]);
 
-  // ✅ Form change
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
+    if (error) setError("");
   };
 
-  // ✅ Submit enquiry
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!token) {
+      router.push("/Login");
+      return;
+    }
+    
     setError("");
     setSuccess("");
+    setSubmitting(true);
 
     if (!property) {
       setError("Property not found.");
+      setSubmitting(false);
       return;
     }
 
@@ -460,10 +110,7 @@ export default function PropertyEnquiryPage({
           "Content-Type": "application/json",
           Authorization: token ? `Bearer ${token}` : "",
         },
-        body: JSON.stringify({
-          ...formData,
-          propertyId: property.id,
-        }),
+        body: JSON.stringify({ ...formData, propertyId: property.id }),
       });
 
       if (!response.ok) throw new Error("Failed to submit enquiry");
@@ -476,165 +123,310 @@ export default function PropertyEnquiryPage({
         message: "",
         visitDate: "",
       });
-    } catch (err: any) {
+      
+      setTimeout(() => setSuccess(""), 5000);
+    } catch (err) {
       setError(err.message || "Something went wrong.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // 🌀 Loading
+  const formatPrice = (price) => {
+    if (price >= 10000000) {
+      return `₹${(price / 10000000).toFixed(1)}Cr`;
+    } else if (price >= 100000) {
+      return `₹${(price / 100000).toFixed(1)}L`;
+    }
+    return `₹${price.toLocaleString()}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
-          <p className="text-lg text-muted-foreground">
-            Loading property details...
-          </p>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+            <p className="text-gray-500">Loading property details...</p>
+          </div>
         </main>
         <Footer />
       </div>
     );
   }
 
-  // ❌ Error
-  if (error) {
+  if (error || !property) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
-          <p className="text-lg text-red-500">{error}</p>
+          <div className="text-center">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <p className="text-lg text-red-500 mb-4">{error || "Property not found"}</p>
+            <Button onClick={() => router.push("/properties")}>Browse Properties</Button>
+          </div>
         </main>
         <Footer />
       </div>
     );
   }
 
-  // ❌ Property missing
-  if (!property) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
-          <p className="text-lg text-red-500">Property not found</p>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  // ✅ Render
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
       <Navbar />
       <main className="flex-1">
         {/* Breadcrumb */}
-        <div className="bg-muted py-4">
-          <div className="container px-4 md:px-6">
-            <div className="flex items-center text-sm">
-              <Link href="/" className="text-muted-foreground hover:text-foreground">
+        <div className="bg-white border-b shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center text-sm flex-wrap gap-2">
+              <Link href="/" className="text-gray-500 hover:text-primary transition-colors">
                 Home
               </Link>
-              <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
-              <Link
-                href="/properties"
-                className="text-muted-foreground hover:text-foreground"
-              >
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <Link href="/properties" className="text-gray-500 hover:text-primary transition-colors">
                 Properties
               </Link>
-              <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
-              <span className="font-medium truncate">
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <span className="text-gray-900 font-medium truncate max-w-[300px]">
                 {property.title}
               </span>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+              <span className="text-primary font-semibold">Enquire Now</span>
             </div>
           </div>
         </div>
 
-        {/* Enquiry */}
-        <section className="py-12">
-          <div className="container px-4 md:px-6">
-            <div className="max-w-3xl mx-auto">
-              <div className="bg-white p-8 rounded-lg shadow-md border">
-                <h1 className="text-2xl font-bold mb-6">
-                  Enquire About This Property
-                </h1>
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-5xl mx-auto">
+            {/* Back Button */}
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-gray-500 hover:text-primary transition-colors mb-6"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Property
+            </button>
 
-                <div className="mb-6 p-4 bg-muted/50 rounded-lg">
-                  <h2 className="font-semibold">{property.title}</h2>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span>{property.address}</span>
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Property Information Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                className="lg:sticky lg:top-24 h-fit"
+              >
+                <div className="bg-white rounded-2xl shadow-lg border overflow-hidden">
+                  {/* Property Image Placeholder */}
+                  <div className="h-48 bg-gradient-to-r from-primary/20 to-primary/10 relative">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Building2 className="h-16 w-16 text-primary/40" />
+                    </div>
+                    <Badge className="absolute top-4 right-4 bg-primary text-white">
+                      {property.type === "rent" ? "For Rent" : "For Sale"}
+                    </Badge>
                   </div>
-                  <p className="font-medium mt-2">
-                    ₹{Number(property.price).toLocaleString()}
-                    {property.type === "rent" ? " /month" : ""}
-                  </p>
+                  
+                  <div className="p-6">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2 line-clamp-2">
+                      {property.title}
+                    </h1>
+                    
+                    <div className="flex items-center text-gray-500 mb-4">
+                      <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+                      <span className="text-sm">{property.address}</span>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <span className="text-3xl font-bold text-primary">
+                        {formatPrice(property.price)}
+                      </span>
+                      {property.type === "rent" && (
+                        <span className="text-gray-500"> /month</span>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-3 py-4 border-t border-b">
+                      <div className="text-center">
+                        <Bed className="h-5 w-5 text-primary mx-auto mb-1" />
+                        <p className="text-sm text-gray-600">{property.bedrooms || 2} Beds</p>
+                      </div>
+                      <div className="text-center">
+                        <Bath className="h-5 w-5 text-primary mx-auto mb-1" />
+                        <p className="text-sm text-gray-600">{property.bathrooms || 2} Baths</p>
+                      </div>
+                      <div className="text-center">
+                        <Square className="h-5 w-5 text-primary mx-auto mb-1" />
+                        <p className="text-sm text-gray-600">{property.area || 1200} sq.ft</p>
+                      </div>
+                    </div>
+                    
+                    {property.ownerName && (
+                      <div className="mt-4 flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Owner/Agent</p>
+                          <p className="text-sm font-medium text-gray-900">{property.ownerName}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              </motion.div>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                  <div className="grid gap-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      required
-                    />
+              {/* Enquiry Form Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <div className="bg-white rounded-2xl shadow-lg border overflow-hidden">
+                  <div className="bg-gradient-to-r from-primary to-primary/70 px-6 py-4">
+                    <h2 className="text-xl font-bold text-white mb-1">
+                      Enquire About This Property
+                    </h2>
+                    <p className="text-white/80 text-sm">
+                      Fill out the form and we'll get back to you shortly
+                    </p>
                   </div>
+                  
+                  <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName" className="text-gray-700 font-medium flex items-center gap-2">
+                        <User className="h-4 w-4 text-primary" />
+                        Full Name <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="fullName"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        placeholder="Enter your full name"
+                        className="focus:ring-2 focus:ring-primary/20"
+                        required
+                      />
+                    </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-gray-700 font-medium flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-primary" />
+                        Email Address <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Enter your email address"
+                        className="focus:ring-2 focus:ring-primary/20"
+                        required
+                      />
+                    </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-gray-700 font-medium flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-primary" />
+                        Phone Number <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="Enter your 10-digit phone number"
+                        className="focus:ring-2 focus:ring-primary/20"
+                        required
+                      />
+                    </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="message">Your Message</Label>
-                    <Textarea
-                      id="message"
-                      rows={4}
-                      value={formData.message}
-                      onChange={handleChange}
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="visitDate" className="text-gray-700 font-medium flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        Preferred Visit Date (Optional)
+                      </Label>
+                      <Input
+                        id="visitDate"
+                        type="date"
+                        value={formData.visitDate}
+                        onChange={handleChange}
+                        className="focus:ring-2 focus:ring-primary/20"
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="visitDate">
-                      Preferred Visit Date (Optional)
-                    </Label>
-                    <Input
-                      id="visitDate"
-                      type="date"
-                      value={formData.visitDate}
-                      onChange={handleChange}
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="message" className="text-gray-700 font-medium flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4 text-primary" />
+                        Your Message
+                      </Label>
+                      <Textarea
+                        id="message"
+                        rows={4}
+                        value={formData.message}
+                        onChange={handleChange}
+                        placeholder="Tell us more about your requirements..."
+                        className="focus:ring-2 focus:ring-primary/20 resize-none"
+                      />
+                    </div>
 
-                  {error && <p className="text-red-500">{error}</p>}
-                  {success && <p className="text-green-500">{success}</p>}
+                    <AnimatePresence>
+                      {error && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"
+                        >
+                          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                          <span>{error}</span>
+                        </motion.div>
+                      )}
+                      
+                      {success && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm"
+                        >
+                          <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                          <span>{success}</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                  <Button type="submit" className="w-full">
-                    Submit Enquiry
-                  </Button>
-                </form>
-              </div>
+                    <Button 
+                      type="submit" 
+                      disabled={submitting}
+                      className="w-full bg-gradient-to-r from-primary to-primary/70 hover:shadow-lg transition-all duration-300 py-6 text-base font-semibold rounded-xl"
+                    >
+                      {submitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-5 w-5 mr-2" />
+                          Submit Enquiry
+                        </>
+                      )}
+                    </Button>
+
+                    {!token && (
+                      <p className="text-center text-sm text-gray-500 mt-4">
+                        Already have an account?{" "}
+                        <Link href="/Login" className="text-primary hover:underline">
+                          Login here
+                        </Link>
+                      </p>
+                    )}
+                  </form>
+                </div>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </div>
       </main>
       <Footer />
     </div>

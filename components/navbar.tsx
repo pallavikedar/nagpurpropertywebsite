@@ -1,308 +1,42 @@
-// "use client"
-
-// import { useState } from "react"
-// import Link from "next/link"
-// import { Menu, X } from "lucide-react"
-// import { Button } from "@/components/ui/button"
-// import { cn } from "@/lib/utils"
-
-// export default function Navbar() {
-//   const [isMenuOpen, setIsMenuOpen] = useState(false)
-
-//   return (
-//     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-//       <div className="container flex h-16 items-center justify-between">
-//         <div className="flex items-center gap-2">
-//           <Link href="/" className="flex items-center space-x-2">
-//             <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-//               Nagpur Properties
-//             </span>
-//           </Link>
-//         </div>
-
-//         {/* Desktop Navigation */}
-//         <nav className="hidden md:flex items-center gap-6">
-//           <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
-//             Home
-//           </Link>
-//           <Link href="/properties" className="text-sm font-medium transition-colors hover:text-primary">
-//             Properties
-//           </Link>
-//           <Link href="/add-property" className="text-sm font-medium transition-colors hover:text-primary">
-//             Add Property
-//           </Link>
-//           <Link href="/enquiry/legal" className="text-sm font-medium transition-colors hover:text-primary">
-//             Legal Consultancy
-//           </Link>
-//           <Link href="/contact" className="text-sm font-medium transition-colors hover:text-primary">
-//             Contact
-//           </Link>
-//         </nav>
-
-//         <div className="hidden md:flex items-center gap-4">
-//           <Link href="/admin">
-//             <Button variant="outline">Admin Login</Button>
-//           </Link>
-//           <Link href="/enquiry/general">
-//             <Button>Enquire Now</Button>
-//           </Link>
-//         </div>
-
-//         {/* Mobile Menu Button */}
-//         <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
-//           {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-//         </button>
-//       </div>
-
-//       {/* Mobile Navigation */}
-//       <div
-//         className={cn(
-//           "md:hidden fixed inset-0 top-16 z-50 bg-background transition-transform duration-300 ease-in-out",
-//           isMenuOpen ? "translate-x-0" : "translate-x-full",
-//         )}
-//       >
-//         <nav className="container flex flex-col gap-6 p-6">
-//           <Link
-//             href="/"
-//             className="text-lg font-medium transition-colors hover:text-primary"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             Home
-//           </Link>
-//           <Link
-//             href="/properties"
-//             className="text-lg font-medium transition-colors hover:text-primary"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             Properties
-//           </Link>
-//           <Link
-//             href="/add-property"
-//             className="text-lg font-medium transition-colors hover:text-primary"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             Add Property
-//           </Link>
-//           <Link
-//             href="/enquiry/legal"
-//             className="text-lg font-medium transition-colors hover:text-primary"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             Legal Consultancy
-//           </Link>
-//           <Link
-//             href="/contact"
-//             className="text-lg font-medium transition-colors hover:text-primary"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             Contact
-//           </Link>
-//           <div className="flex flex-col gap-4 mt-4">
-//             <Link href="/admin" onClick={() => setIsMenuOpen(false)}>
-//               <Button variant="outline" className="w-full">
-//                 Admin Login
-//               </Button>
-//             </Link>
-//             <Link href="/enquiry/general" onClick={() => setIsMenuOpen(false)}>
-//               <Button className="w-full">Enquire Now</Button>
-//             </Link>
-//           </div>
-//         </nav>
-//       </div>
-//     </header>
-//   )
-// }
-
-// "use client"
-
-// import { useState, useEffect } from "react"
-// import Link from "next/link"
-// import { Menu, X, User } from "lucide-react"
-// import { LanguageProvider, useLanguage } from "@/context/language-context"
-// import { Button } from "@/components/ui/button"
-// import { cn } from "@/lib/utils"
-// export default function Navbar() {
-//   return <NavbarDashboard />
-   
-// }
-//  function NavbarDashboard() {
-//   const { language, translations, setLanguage } = useLanguage()
-//   const t = translations
-//   const [isMenuOpen, setIsMenuOpen] = useState(false)
-//   const [isLoggedIn, setIsLoggedIn] = useState(false) // Replace with actual authentication logic
-//   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
-
-//   // Simulate fetching login status (replace with actual logic)
-//   useEffect(() => {
-//     // Example: Check if the user is logged in (replace with real authentication check)
-//     const userLoggedIn = Boolean(localStorage.getItem("userLoggedIn")) // Example: Replace with actual logic
-//     setIsLoggedIn(userLoggedIn)
-//   }, [])
-
-//   return (
-//     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-//       <div className="container flex h-16 items-center justify-between">
-//         <div className="flex items-center gap-2">
-//           <Link href="/" className="flex items-center space-x-2">
-//             <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-//               {t.appName}
-//             </span>
-//           </Link>
-//         </div>
-
-//         {/* Desktop Navigation */}
-//         <nav className="hidden md:flex items-center gap-6">
-//           <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
-//            {t.home}
-//           </Link>
-//           <Link href="/properties" className="text-sm font-medium transition-colors hover:text-primary">
-//             {t.Properties}
-//           </Link>
-//           <Link href="/add-property" className="text-sm font-medium transition-colors hover:text-primary">
-//             {t.AddProperty}
-//           </Link>
-//           <Link href="/enquiry/legal" className="text-sm font-medium transition-colors hover:text-primary">
-//             {t.LegalConsultancy}
-//           </Link>
-//           <Link href="/contact" className="text-sm font-medium transition-colors hover:text-primary">
-//             {t.Contact}
-//           </Link>
-//         </nav>
-
-//         <div className="hidden md:flex items-center gap-4">
-//           {isLoggedIn ? (
-//             <div className="relative">
-//               <button
-//                 className="flex items-center space-x-2"
-//                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-//                 aria-label="Toggle profile menu"
-//               >
-//                 <User className="h-6 w-6" />
-//               </button>
-//               {isProfileMenuOpen && (
-//                 <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg">
-//                   <Link
-//                     href="/profile"
-//                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-//                     onClick={() => setIsProfileMenuOpen(false)}
-//                   >
-//                    {t.Profile}
-//                   </Link>
-//                   <Link
-//                     href="/myproperty"
-//                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-//                     onClick={() => setIsProfileMenuOpen(false)}
-//                   >
-//                     {t.MyProperties}
-//                   </Link>
-//                   <button
-//                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-//                     onClick={() => {
-//                       // Simulate logout (replace with actual logout logic)
-//                       localStorage.removeItem("isLoggedIn")
-//                       localStorage.removeItem("usertoken") // Example: Replace with actual logic
-//                       setIsLoggedIn(false)
-//                       setIsProfileMenuOpen(false)
-//                     }}
-//                   >
-//                     {t.Logout}
-//                   </button>
-//                 </div>
-//               )}
-//             </div>
-//           ) : (
-//             <Link href="/Login">
-//               <Button>{t.Login}</Button>
-//             </Link>
-//           )}
-//         </div>
-
-//         {/* Mobile Menu Button */}
-//         <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
-//           {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-//         </button>
-//       </div>
-
-//       {/* Mobile Navigation */}
-//       <div
-//         className={cn(
-//           "md:hidden fixed inset-0 top-16 z-50 bg-background transition-transform duration-300 ease-in-out",
-//           isMenuOpen ? "translate-x-0" : "translate-x-full",
-//         )}
-//       >
-//         <nav className="container flex flex-col gap-6 p-6">
-//           <Link
-//             href="/"
-//             className="text-lg font-medium transition-colors hover:text-primary"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             {t.home}
-//           </Link>
-//           <Link
-//             href="/properties"
-//             className="text-lg font-medium transition-colors hover:text-primary"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             {t.Properties}
-//           </Link>
-//           <Link
-//             href="/add-property"
-//             className="text-lg font-medium transition-colors hover:text-primary"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             {t.AddProperty}
-//           </Link>
-//           <Link
-//             href="/enquiry/legal"
-//             className="text-lg font-medium transition-colors hover:text-primary"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             {t.LegalConsultancy}
-//           </Link>
-//           <Link
-//             href="/contact"
-//             className="text-lg font-medium transition-colors hover:text-primary"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             {t.Contact}
-//           </Link>
-//           <div className="flex flex-col gap-4 mt-4">
-//             {isLoggedIn ? (
-//               <button
-//                 className="text-lg font-medium transition-colors hover:text-primary"
-//                 onClick={() => {
-//                   // Simulate logout (replace with actual logout logic)
-//                   localStorage.removeItem("isLoggedIn")
-//                   setIsLoggedIn(false)
-//                   setIsMenuOpen(false)
-//                 }}
-//               >
-//                 {t.Logout}
-//               </button>
-//             ) : (
-//               <Link href="/Login" onClick={() => setIsMenuOpen(false)}>
-//                 <Button className="w-full">{t.Login}</Button>
-//               </Link>
-//             )}
-//           </div>
-          
-//         </nav>
-//       </div>
-//     </header>
-//   )
-// }
-
-
-
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 import Link from "next/link";
-import { Menu, X, User } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu, X, User, ChevronDown, Home, Building2, PlusCircle, Scale, Phone, Globe, LogOut, UserCircle, Key, Briefcase } from "lucide-react";
 import { useLanguage } from "@/context/language-context";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Memoized NavItem for better performance
+const NavItem = memo(({ href, label, icon: Icon, isActive }) => (
+  <Link
+    href={href}
+    prefetch={true} // Enable prefetching for instant navigation
+    className={cn(
+      "relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+      "hover:text-primary hover:bg-primary/5",
+      isActive 
+        ? "text-primary bg-primary/10" 
+        : "text-gray-600"
+    )}
+  >
+    <span className="flex items-center gap-2">
+      <Icon className="w-4 h-4" />
+      {label}
+    </span>
+    {isActive && (
+      <motion.div
+        layoutId="activeNav"
+        className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
+        transition={{ duration: 0.15 }}
+      />
+    )}
+  </Link>
+));
+
+NavItem.displayName = "NavItem";
 
 export default function Navbar() {
   return <NavbarDashboard />;
@@ -311,136 +45,457 @@ export default function Navbar() {
 function NavbarDashboard() {
   const { language, translations, setLanguage } = useLanguage();
   const t = translations;
+  const pathname = usePathname();
+  const router = useRouter();
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Replace with actual authentication logic
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [userName, setUserName] = useState("");
+  
+  const languageMenuRef = useRef(null);
+  const profileMenuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
-  // Simulate fetching login status (replace with actual logic)
+  // Check login status - optimized
   useEffect(() => {
-    const userLoggedIn = Boolean(localStorage.getItem("userLoggedIn")); // Example: Replace with actual logic
-    setIsLoggedIn(userLoggedIn);
+    const checkLoginStatus = () => {
+      const userToken = localStorage.getItem("usertoken");
+      const adminToken = localStorage.getItem("admintoken");
+      const token = userToken || adminToken;
+      const loggedIn = !!token;
+      
+      setIsLoggedIn(loggedIn);
+      
+      if (loggedIn) {
+        const storedName = localStorage.getItem("userName") || localStorage.getItem("adminName") || "User";
+        setUserName(storedName);
+      }
+    };
+    
+    checkLoginStatus();
+    window.addEventListener("storage", checkLoginStatus);
+    return () => window.removeEventListener("storage", checkLoginStatus);
   }, []);
 
-  const handleLanguageChange = (lang: string) => {
-    setLanguage(lang); // Update the language in the context
-    localStorage.setItem("language", lang); // Persist the selected language
-    setIsLanguageMenuOpen(false); // Close the language dropdown
-  };
+  // Handle scroll effect - passive for performance
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close menus on route change - immediate
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsLanguageMenuOpen(false);
+    setIsProfileMenuOpen(false);
+  }, [pathname]);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (languageMenuRef.current && !languageMenuRef.current.contains(event.target)) {
+        setIsLanguageMenuOpen(false);
+      }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Simple body scroll lock for mobile menu
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
+  const handleLanguageChange = useCallback((lang) => {
+    setLanguage(lang);
+    localStorage.setItem("language", lang);
+    setIsLanguageMenuOpen(false);
+  }, [setLanguage]);
+
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("usertoken");
+    localStorage.removeItem("admintoken");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("adminName");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("adminEmail");
+    setIsLoggedIn(false);
+    setIsProfileMenuOpen(false);
+    setIsMenuOpen(false);
+    router.push("/");
+  }, [router]);
+
+  // Prefetch all important routes on mount for instant navigation
+  useEffect(() => {
+    const routes = ["/", "/properties", "/add-property", "/enquiry/legal", "/contact"];
+    routes.forEach(route => {
+      router.prefetch(route);
+    });
+  }, [router]);
+
+  const navItems = [
+    { href: "/", label: t.home || "Home", icon: Home },
+    { href: "/properties", label: t.Properties || "Properties", icon: Building2 },
+    { href: "/add-property", label: t.AddProperty || "Add Property", icon: PlusCircle },
+    { href: "/enquiry/legal", label: t.LegalConsultancy || "Legal Consultancy", icon: Scale },
+    { href: "/contact", label: t.Contact || "Contact", icon: Phone },
+  ];
+
+  const languages = [
+    { code: "english", label: "English", nativeLabel: "English" },
+    { code: "hindi", label: "हिंदी", nativeLabel: "Hindi" },
+    { code: "marathi", label: "मराठी", nativeLabel: "Marathi" },
+  ];
+
+  const currentLanguage = languages.find(l => l.code === language) || languages[0];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              {t.appName || "Nagpur Properties"}
-            </span>
-          </Link>
-        </div>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
-          <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
-            {t.home || "Home"}
-          </Link>
-          <Link href="/properties" className="text-sm font-medium transition-colors hover:text-primary">
-            {t.Properties || "Properties"}
-          </Link>
-          <Link href="/add-property" className="text-sm font-medium transition-colors hover:text-primary">
-            {t.AddProperty || "Add Property"}
-          </Link>
-          <Link href="/enquiry/legal" className="text-sm font-medium transition-colors hover:text-primary">
-            {t.LegalConsultancy || "Legal Consultancy"}
-          </Link>
-          <Link href="/contact" className="text-sm font-medium transition-colors hover:text-primary">
-            {t.Contact || "Contact"}
-          </Link>
-        </nav>
-
-        <div className="hidden md:flex items-center gap-4">
-          {/* Language Dropdown */}
-          <div className="relative">
-            <button
-              className="text-sm font-medium transition-colors hover:text-primary"
-              onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
+    <>
+      <header className={cn(
+        "fixed top-0 z-50 w-full transition-all duration-200",
+        scrolled 
+          ? "bg-white/95 backdrop-blur-md shadow-lg border-b" 
+          : "bg-white/80 backdrop-blur-sm border-b"
+      )}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between gap-4">
+            {/* Logo */}
+            <Link 
+              href="/" 
+              className="flex items-center space-x-2 group flex-shrink-0"
+              aria-label="Home"
+              prefetch={true}
             >
-              {language === "english" ? "English" : language === "hindi" ? "हिंदी" : "मराठी"}
-            </button>
-            {isLanguageMenuOpen && (
-              <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg">
-                <button
-                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("english")}
-                >
-                  English
-                </button>
-                <button
-                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("hindi")}
-                >
-                  हिंदी
-                </button>
-                <button
-                  className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => handleLanguageChange("marathi")}
-                >
-                  मराठी
-                </button>
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary/70 rounded-full blur opacity-0 group-hover:opacity-75 transition duration-200" />
+                <span className="relative text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent whitespace-nowrap">
+                  {t.appName || "Nagpur Properties"}
+                </span>
               </div>
-            )}
-          </div>
+            </Link>
 
-          {isLoggedIn ? (
-            <div className="relative">
-              <button
-                className="flex items-center space-x-2"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label="Toggle profile menu"
-              >
-                <User className="h-6 w-6" />
-              </button>
-              {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg">
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {t.Profile || "Profile"}
-                  </Link>
-                  <Link
-                    href="/myproperty"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {t.MyProperties || "My Properties"}
-                  </Link>
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-1">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <NavItem
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    icon={item.icon}
+                    isActive={isActive}
+                  />
+                );
+              })}
+            </nav>
+
+            {/* Desktop Right Section */}
+            <div className="hidden lg:flex items-center gap-3">
+              {/* Language Dropdown */}
+              <div className="relative" ref={languageMenuRef}>
+                <button
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+                    "hover:text-primary hover:bg-primary/5",
+                    isLanguageMenuOpen && "text-primary bg-primary/5"
+                  )}
+                  onClick={() => setIsLanguageMenuOpen(!isLanguageMenuOpen)}
+                  aria-label="Select language"
+                >
+                  <Globe className="w-4 h-4" />
+                  <span>{currentLanguage.nativeLabel}</span>
+                  <ChevronDown className={cn(
+                    "w-3 h-3 transition-transform duration-150",
+                    isLanguageMenuOpen && "rotate-180"
+                  )} />
+                </button>
+                
+                <AnimatePresence>
+                  {isLanguageMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.1 }}
+                      className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border overflow-hidden z-50"
+                    >
+                      {languages.map((lang) => (
+                        <button
+                          key={lang.code}
+                          className={cn(
+                            "w-full px-4 py-2.5 text-sm text-left transition-colors hover:bg-primary/5",
+                            language === lang.code && "text-primary bg-primary/5 font-medium"
+                          )}
+                          onClick={() => handleLanguageChange(lang.code)}
+                        >
+                          {lang.label}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* User Section */}
+              {isLoggedIn ? (
+                <div className="relative" ref={profileMenuRef}>
                   <button
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => {
-                      localStorage.removeItem("isLoggedIn");
-                      localStorage.removeItem("usertoken");
-                      setIsLoggedIn(false);
-                      setIsMenuOpen(false);
-                    }}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-150",
+                      "hover:bg-primary/5",
+                      isProfileMenuOpen && "bg-primary/5"
+                    )}
+                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                    aria-label="User menu"
                   >
-                    {t.Logout || "Logout"}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-primary/70 flex items-center justify-center text-white">
+                      <span className="text-sm font-semibold">
+                        {userName?.charAt(0).toUpperCase() || "U"}
+                      </span>
+                    </div>
+                    <ChevronDown className={cn(
+                      "w-3 h-3 text-gray-500 transition-transform duration-150",
+                      isProfileMenuOpen && "rotate-180"
+                    )} />
                   </button>
+                  
+                  <AnimatePresence>
+                    {isProfileMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.1 }}
+                        className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border overflow-hidden z-50"
+                      >
+                        <div className="px-4 py-3 border-b bg-gray-50">
+                          <p className="text-sm font-medium text-gray-900">{userName}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Welcome back!</p>
+                        </div>
+                        
+                        <div className="py-1">
+                          <Link
+                            href="/profile"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 transition-colors"
+                            onClick={() => setIsProfileMenuOpen(false)}
+                            prefetch={true}
+                          >
+                            <UserCircle className="w-4 h-4" />
+                            {t.Profile || "Profile"}
+                          </Link>
+                          <Link
+                            href="/myproperty"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 transition-colors"
+                            onClick={() => setIsProfileMenuOpen(false)}
+                            prefetch={true}
+                          >
+                            <Briefcase className="w-4 h-4" />
+                            {t.MyProperties || "My Properties"}
+                          </Link>
+                          <Link
+                            href="/change-password"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 transition-colors"
+                            onClick={() => setIsProfileMenuOpen(false)}
+                            prefetch={true}
+                          >
+                            <Key className="w-4 h-4" />
+                            Change Password
+                          </Link>
+                          <hr className="my-1" />
+                          <button
+                            className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            onClick={handleLogout}
+                          >
+                            <LogOut className="w-4 h-4" />
+                            {t.Logout || "Logout"}
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
+              ) : (
+                <Link href="/Login" prefetch={true}>
+                  <Button className="bg-gradient-to-r from-primary to-primary/70 hover:shadow-lg transition-all duration-200">
+                    <User className="w-4 h-4 mr-2" />
+                    {t.Login || "Login"}
+                  </Button>
+                </Link>
               )}
             </div>
-          ) : (
-            <Link href="/Login">
-              <Button>{t.Login || "Login"}</Button>
-            </Link>
-          )}
-        </div>
 
-        {/* Mobile Menu Button */}
-        <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
-          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-      </div>
-    </header>
+            {/* Mobile Menu Button */}
+            <button
+              className="lg:hidden relative z-[60] w-10 h-10 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Navigation Drawer - Optimized for fast open/close */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="fixed inset-0 bg-black/50 z-[60] lg:hidden"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            
+            {/* Drawer Panel - Fast spring animation */}
+            <motion.div
+              ref={mobileMenuRef}
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ 
+                type: "spring", 
+                damping: 30, 
+                stiffness: 400,
+                mass: 0.3
+              }}
+              className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl z-[70] lg:hidden overflow-y-auto"
+            >
+              <div className="p-6 pt-20">
+                {/* User Info for Mobile */}
+                {isLoggedIn && (
+                  <div className="mb-6 p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-primary/70 flex items-center justify-center text-white">
+                        <span className="text-lg font-semibold">
+                          {userName?.charAt(0).toUpperCase() || "U"}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">{userName}</p>
+                        <p className="text-sm text-gray-500">Welcome back!</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Mobile Navigation Links - No animations for speed */}
+                <nav className="flex flex-col space-y-1 mb-6">
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = pathname === item.href;
+                    
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-150",
+                          "hover:bg-primary/5 hover:text-primary active:bg-primary/10",
+                          isActive && "bg-primary/10 text-primary"
+                        )}
+                        prefetch={true}
+                      >
+                        <Icon className="w-5 h-5" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </nav>
+
+                <div className="border-t pt-6 space-y-4">
+                  {/* Mobile Language Selection */}
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-2">Select Language</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {languages.map((lang) => (
+                        <button
+                          key={lang.code}
+                          className={cn(
+                            "px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
+                            "hover:bg-primary/5 active:bg-primary/10",
+                            language === lang.code && "bg-primary text-white hover:bg-primary"
+                          )}
+                          onClick={() => {
+                            handleLanguageChange(lang.code);
+                            setIsMenuOpen(false);
+                          }}
+                        >
+                          {lang.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Mobile Auth Buttons */}
+                  {isLoggedIn ? (
+                    <div className="space-y-2">
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium hover:bg-primary/5 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                        prefetch={true}
+                      >
+                        <UserCircle className="w-5 h-5" />
+                        {t.Profile || "Profile"}
+                      </Link>
+                      <Link
+                        href="/myproperty"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium hover:bg-primary/5 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                        prefetch={true}
+                      >
+                        <Briefcase className="w-5 h-5" />
+                        {t.MyProperties || "My Properties"}
+                      </Link>
+                      <button
+                        className="flex w-full items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-red-600 hover:bg-red-50 transition-colors"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="w-5 h-5" />
+                        {t.Logout || "Logout"}
+                      </button>
+                    </div>
+                  ) : (
+                    <Link href="/Login" onClick={() => setIsMenuOpen(false)} prefetch={true}>
+                      <Button className="w-full bg-gradient-to-r from-primary to-primary/70">
+                        <User className="w-4 h-4 mr-2" />
+                        {t.Login || "Login"}
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Spacer */}
+      <div className="h-16" />
+    </>
   );
 }
