@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,6 +36,9 @@ import { BASE_URL } from "../../../baseurl";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminSidebar from "@/components/admin-sidebar";
+
+// 🔥 IMPORTANT: Add this line to fix Vercel deployment
+export const dynamic = 'force-dynamic';
 
 export default function UpdatePropertyPage() {
   const { translations } = useLanguage();
