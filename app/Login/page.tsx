@@ -36,15 +36,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Fix: Only access localStorage after component mounts
   useEffect(() => {
-    setMounted(true);
-    const rememberedEmail = localStorage.getItem("rememberedEmail");
-    if (rememberedEmail) {
-      setFormData(prev => ({ ...prev, email: rememberedEmail }));
-      setRememberMe(true);
+    setIsMounted(true);
+    if (typeof window !== 'undefined') {
+      const rememberedEmail = localStorage.getItem("rememberedEmail");
+      if (rememberedEmail) {
+        setFormData(prev => ({ ...prev, email: rememberedEmail }));
+        setRememberMe(true);
+      }
     }
   }, []);
 
@@ -78,32 +80,29 @@ export default function LoginPage() {
 
       if (response.ok) {
         let roleName = null;
-        if (data.admin) {
-          roleName = data.admin.role[0].roleName;
-          // Fix: Check if window exists before using localStorage
-          if (typeof window !== 'undefined') {
+        
+        // Only access localStorage in browser
+        if (typeof window !== 'undefined') {
+          if (data.admin) {
+            roleName = data.admin.role[0].roleName;
             localStorage.setItem("admintoken", data.jwtToken);
             localStorage.setItem("adminLoggedIn", "true");
             if (data.admin.name) localStorage.setItem("adminName", data.admin.name);
             if (data.admin.email) localStorage.setItem("adminEmail", data.admin.email);
-          }
-        } else if (data.user) {
-          roleName = data.user.role[0].roleName;
-          if (typeof window !== 'undefined') {
+          } else if (data.user) {
+            roleName = data.user.role[0].roleName;
             localStorage.setItem("usertoken", data.jwtToken);
             localStorage.setItem("userLoggedIn", "true");
             if (data.user.name) localStorage.setItem("userName", data.user.name);
             if (data.user.email) localStorage.setItem("userEmail", data.user.email);
           }
-        }
 
-        if (rememberMe && typeof window !== 'undefined') {
-          localStorage.setItem("rememberedEmail", formData.email);
-        } else if (typeof window !== 'undefined') {
-          localStorage.removeItem("rememberedEmail");
-        }
+          if (rememberMe) {
+            localStorage.setItem("rememberedEmail", formData.email);
+          } else {
+            localStorage.removeItem("rememberedEmail");
+          }
 
-        if (typeof window !== 'undefined') {
           localStorage.setItem("role", roleName);
         }
 
@@ -129,9 +128,17 @@ export default function LoginPage() {
     router.push("/user/Register");
   };
 
-  // Don't render until mounted to avoid hydration issues
-  if (!mounted) {
-    return null;
+  // Don't render until mounted to avoid hydration errors
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   return (
@@ -140,7 +147,6 @@ export default function LoginPage() {
       
       <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md">
-          {/* Logo/Brand Section */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -158,7 +164,6 @@ export default function LoginPage() {
             </p>
           </motion.div>
 
-          {/* Login Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -173,26 +178,22 @@ export default function LoginPage() {
               
               <CardContent className="pt-8 pb-6 px-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Email Field */}
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-gray-700 font-medium flex items-center gap-2">
                       <Mail className="h-4 w-4 text-primary" />
                       {t.email || "Email Address"}
                     </Label>
-                    <div className="relative">
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder={t.enterEmail || "Enter your email"}
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="pl-4 py-3 rounded-xl border-gray-200 focus:border-primary focus:ring-primary/20 transition-all"
-                        required
-                      />
-                    </div>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder={t.enterEmail || "Enter your email"}
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="pl-4 py-3 rounded-xl border-gray-200 focus:border-primary focus:ring-primary/20 transition-all"
+                      required
+                    />
                   </div>
 
-                  {/* Password Field */}
                   <div className="space-y-2">
                     <Label htmlFor="password" className="text-gray-700 font-medium flex items-center gap-2">
                       <Lock className="h-4 w-4 text-primary" />
@@ -211,14 +212,13 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                   </div>
 
-                  {/* Remember Me & Forgot Password */}
                   <div className="flex items-center justify-between">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -238,7 +238,6 @@ export default function LoginPage() {
                     </button>
                   </div>
 
-                  {/* Error Message */}
                   <AnimatePresence>
                     {error && (
                       <motion.div
@@ -253,7 +252,6 @@ export default function LoginPage() {
                     )}
                   </AnimatePresence>
 
-                  {/* Login Button */}
                   <Button 
                     type="submit" 
                     disabled={loading}
@@ -272,7 +270,6 @@ export default function LoginPage() {
                     )}
                   </Button>
 
-                  {/* Register Link */}
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-gray-200"></div>
@@ -293,7 +290,6 @@ export default function LoginPage() {
                   </Button>
                 </form>
 
-                {/* Security Note */}
                 <div className="mt-6 p-3 bg-gray-50 rounded-lg flex items-center gap-2">
                   <Shield className="h-4 w-4 text-green-600 flex-shrink-0" />
                   <p className="text-xs text-gray-500">
@@ -304,7 +300,6 @@ export default function LoginPage() {
             </Card>
           </motion.div>
 
-          {/* Help Text */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
