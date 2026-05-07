@@ -34,6 +34,12 @@ import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { BASE_URL } from "@/app/baseurl";
+export const dynamic = 'force-dynamic';
+export async function generateStaticParams() {
+  // Return empty array if you don't know IDs at build time
+  // or fetch them from your API
+  return [];
+}
 
 export default function PropertyEnquiryPage({ params }) {
   const router = useRouter();
