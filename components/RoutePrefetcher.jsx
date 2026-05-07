@@ -7,13 +7,15 @@ export default function RoutePrefetcher() {
   const router = useRouter();
   
   useEffect(() => {
+    // Only run in browser
+    if (typeof window === 'undefined') return;
+    
     // Prefetch all routes instantly
     const routes = ["/", "/properties", "/add-property", "/contact", "/Login", "/profile"];
     routes.forEach(route => router.prefetch(route));
     
-    // Prefetch on hover - FIXED
+    // Prefetch on hover
     const prefetchOnHover = (e) => {
-      // Check if e.target is an element and has closest method
       if (e.target && typeof e.target.closest === 'function') {
         const link = e.target.closest('a');
         if (link?.href && link.getAttribute('href') && !link.href.startsWith('http')) {

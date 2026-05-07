@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
 import { BASE_URL } from "@/app/baseurl";
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
@@ -21,8 +21,7 @@ import {
   Building,
   CheckCircle,
   AlertCircle,
-  Shield,
-  Loader2
+  Shield
 } from "lucide-react";
 
 export default function LoginPage() {
@@ -37,6 +36,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Fix: Only access localStorage after component mounts
+  useEffect(() => {
+    setMounted(true);
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    if (rememberedEmail) {
+      setFormData(prev => ({ ...prev, email: rememberedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -44,7 +54,6 @@ export default function LoginPage() {
       ...prev,
       [id]: value,
     }));
-    // Clear error when user starts typing
     if (error) setError("");
   };
 
@@ -71,25 +80,32 @@ export default function LoginPage() {
         let roleName = null;
         if (data.admin) {
           roleName = data.admin.role[0].roleName;
-          localStorage.setItem("admintoken", data.jwtToken);
-          localStorage.setItem("adminLoggedIn", "true");
-          if (data.admin.name) localStorage.setItem("adminName", data.admin.name);
-          if (data.admin.email) localStorage.setItem("adminEmail", data.admin.email);
+          // Fix: Check if window exists before using localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.setItem("admintoken", data.jwtToken);
+            localStorage.setItem("adminLoggedIn", "true");
+            if (data.admin.name) localStorage.setItem("adminName", data.admin.name);
+            if (data.admin.email) localStorage.setItem("adminEmail", data.admin.email);
+          }
         } else if (data.user) {
           roleName = data.user.role[0].roleName;
-          localStorage.setItem("usertoken", data.jwtToken);
-          localStorage.setItem("userLoggedIn", "true");
-          if (data.user.name) localStorage.setItem("userName", data.user.name);
-          if (data.user.email) localStorage.setItem("userEmail", data.user.email);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem("usertoken", data.jwtToken);
+            localStorage.setItem("userLoggedIn", "true");
+            if (data.user.name) localStorage.setItem("userName", data.user.name);
+            if (data.user.email) localStorage.setItem("userEmail", data.user.email);
+          }
         }
 
-        if (rememberMe) {
+        if (rememberMe && typeof window !== 'undefined') {
           localStorage.setItem("rememberedEmail", formData.email);
-        } else {
+        } else if (typeof window !== 'undefined') {
           localStorage.removeItem("rememberedEmail");
         }
 
-        localStorage.setItem("role", roleName);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("role", roleName);
+        }
 
         // Redirect based on role
         if (roleName === "Admin") {
@@ -98,15 +114,13 @@ export default function LoginPage() {
           router.push("/");
         } else {
           setError("Unknown role. Please contact support.");
-          setLoading(false);
-          return;
         }
       } else {
         setError(data.message || "Login failed. Please try again.");
-        setLoading(false);
       }
     } catch (err) {
       setError("Network error or server issue. Please try again later.");
+    } finally {
       setLoading(false);
     }
   };
@@ -115,14 +129,10 @@ export default function LoginPage() {
     router.push("/user/Register");
   };
 
-  // Load remembered email on mount
-  useState(() => {
-    const rememberedEmail = localStorage.getItem("rememberedEmail");
-    if (rememberedEmail) {
-      setFormData(prev => ({ ...prev, email: rememberedEmail }));
-      setRememberMe(true);
-    }
-  }, []);
+  // Don't render until mounted to avoid hydration issues
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
@@ -178,7 +188,6 @@ export default function LoginPage() {
                         onChange={handleChange}
                         className="pl-4 py-3 rounded-xl border-gray-200 focus:border-primary focus:ring-primary/20 transition-all"
                         required
-                        disabled={loading}
                       />
                     </div>
                   </div>
@@ -198,13 +207,11 @@ export default function LoginPage() {
                         onChange={handleChange}
                         className="pl-4 pr-10 py-3 rounded-xl border-gray-200 focus:border-primary focus:ring-primary/20 transition-all"
                         required
-                        disabled={loading}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                        disabled={loading}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -219,7 +226,6 @@ export default function LoginPage() {
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
                         className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
-                        disabled={loading}
                       />
                       <span className="text-sm text-gray-600">Remember me</span>
                     </label>
@@ -227,7 +233,6 @@ export default function LoginPage() {
                       type="button"
                       onClick={() => router.push("/forgot-password")}
                       className="text-sm text-primary hover:text-primary/80 transition-colors"
-                      disabled={loading}
                     >
                       Forgot password?
                     </button>
@@ -248,58 +253,23 @@ export default function LoginPage() {
                     )}
                   </AnimatePresence>
 
-                  {/* Login Button with Enhanced Loader */}
+                  {/* Login Button */}
                   <Button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-primary to-primary/70 hover:shadow-lg transition-all duration-300 py-6 text-base font-semibold rounded-xl relative overflow-hidden"
+                    className="w-full bg-gradient-to-r from-primary to-primary/70 hover:shadow-lg transition-all duration-300 py-6 text-base font-semibold rounded-xl"
                   >
-                    <AnimatePresence mode="wait">
-                      {loading ? (
-                        <motion.div
-                          key="loading"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="flex items-center justify-center gap-3"
-                        >
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          <span>{t.Loggingin || "Logging in..."}</span>
-                          <motion.span
-                            animate={{ opacity: [0, 1, 0] }}
-                            transition={{ repeat: Infinity, duration: 1.5 }}
-                            className="text-sm"
-                          >
-                            .
-                          </motion.span>
-                          <motion.span
-                            animate={{ opacity: [0, 1, 0] }}
-                            transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }}
-                            className="text-sm"
-                          >
-                            .
-                          </motion.span>
-                          <motion.span
-                            animate={{ opacity: [0, 1, 0] }}
-                            transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }}
-                            className="text-sm"
-                          >
-                            .
-                          </motion.span>
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="login"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="flex items-center justify-center gap-2"
-                        >
-                          <LogIn className="h-5 w-5" />
-                          {t.Login || "Login"}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {loading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+                        {t.Loggingin || "Logging in..."}
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="h-5 w-5 mr-2" />
+                        {t.Login || "Login"}
+                      </>
+                    )}
                   </Button>
 
                   {/* Register Link */}
@@ -317,7 +287,6 @@ export default function LoginPage() {
                     variant="outline"
                     onClick={handleRegisterRedirect}
                     className="w-full border-2 hover:bg-gray-50 transition-all duration-300 py-6 text-base rounded-xl"
-                    disabled={loading}
                   >
                     <UserPlus className="h-5 w-5 mr-2 text-primary" />
                     {t.UserRegistration || "Create New Account"}
