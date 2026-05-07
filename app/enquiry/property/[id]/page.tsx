@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -34,12 +35,9 @@ import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { BASE_URL } from "@/app/baseurl";
+
+// ✅ Only keep dynamic = 'force-dynamic', remove generateStaticParams
 export const dynamic = 'force-dynamic';
-export async function generateStaticParams() {
-  // Return empty array if you don't know IDs at build time
-  // or fetch them from your API
-  return [];
-}
 
 export default function PropertyEnquiryPage({ params }) {
   const router = useRouter();
@@ -274,17 +272,6 @@ export default function PropertyEnquiryPage({ params }) {
                         </div>
                       </div>
                     )}
-                    
-                    {/* <div className="mt-4 flex gap-3">
-                      <Button variant="outline" className="flex-1 gap-2">
-                        <Heart className="h-4 w-4" />
-                        Save
-                      </Button>
-                      <Button variant="outline" className="flex-1 gap-2">
-                        <Share2 className="h-4 w-4" />
-                        Share
-                      </Button>
-                    </div> */}
                   </div>
                 </div>
               </motion.div>
