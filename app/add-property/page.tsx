@@ -974,8 +974,8 @@ export default function AddPropertyPage() {
       
       // Redirect after 2 seconds
       setTimeout(() => {
-        window.location.href = "/my-properties";
-      }, 2000);
+        window.location.href = "/myproperty";
+      }, 1000);
       
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
