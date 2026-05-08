@@ -125,52 +125,6 @@ export default function Footer() {
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/10 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2" />
 
         <div className="container mx-auto px-4 py-16 relative z-10">
-          {/* Top Section with Newsletter */}
-          {/* <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={footerVariants}
-            className="border-b border-gray-700 pb-12 mb-12"
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  Subscribe to Our Newsletter
-                </h3>
-                <p className="text-gray-400">
-                  Get the latest property updates, market insights, and exclusive offers directly in your inbox.
-                </p>
-              </div>
-              <div>
-                <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1">
-                    <Input
-                      type="email"
-                      placeholder="Enter your email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-primary"
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="bg-primary hover:bg-primary/90 whitespace-nowrap">
-                    Subscribe Now
-                  </Button>
-                </form>
-                {subscribed && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-green-400 text-sm mt-2"
-                  >
-                    ✅ Thank you for subscribing!
-                  </motion.p>
-                )}
-              </div>
-            </div>
-          </motion.div> */}
-
           {/* Main Footer Content */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {/* Company Info */}
@@ -202,29 +156,6 @@ export default function Footer() {
                   );
                 })}
               </div>
-
-              {/* Social Links */}
-              {/* <div className="pt-4">
-                <p className="text-sm font-medium text-white mb-3">Follow Us</p>
-                <div className="flex space-x-3">
-                  {socialLinks.map((social, index) => {
-                    const Icon = social.icon;
-                    return (
-                      <motion.a
-                        key={index}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        whileHover={{ y: -3, scale: 1.1 }}
-                        className="w-10 h-10 bg-gray-800 hover:bg-primary rounded-full flex items-center justify-center transition-all duration-300 group"
-                        style={{ '--hover-color': social.color }}
-                      >
-                        <Icon className="h-4 w-4 text-gray-400 group-hover:text-white transition-colors" />
-                      </motion.a>
-                    );
-                  })}
-                </div>
-              </div> */}
             </motion.div>
 
             {/* Quick Links */}
@@ -311,11 +242,7 @@ export default function Footer() {
                     <MapPin className="h-4 w-4 text-primary" />
                   </div>
                   <span className="text-gray-400 text-sm leading-relaxed flex-1">
-<<<<<<< HEAD
-                   302, Sai Shraddha Appt., Behind White House Bungalow, Utkarsh Society, Dabha-Wadi Road, Nagpur - 440023
-=======
                     302, Sai Shraddha Appt., Behind White House Bungalow, Utkarsh Society, Dabha-Wadi Road, Nagpur - 440023
->>>>>>> abac998f36a5721ca3d689325f31d3735ec48452
                   </span>
                 </motion.li>
                 <motion.li variants={itemVariants} className="flex items-center gap-3 group">
@@ -365,19 +292,6 @@ export default function Footer() {
               <p className="text-gray-400 text-sm text-center md:text-left">
                 © {new Date().getFullYear()} {t.footer || "Nagpur Properties. All rights reserved."}
               </p>
-              {/* <div className="flex flex-wrap justify-center gap-4 text-sm">
-                <Link href="/privacy-policy" className="text-gray-400 hover:text-primary transition-colors">
-                  Privacy Policy
-                </Link>
-                <span className="text-gray-600">|</span>
-                <Link href="/terms-of-service" className="text-gray-400 hover:text-primary transition-colors">
-                  Terms of Service
-                </Link>
-                <span className="text-gray-600">|</span>
-                <Link href="/sitemap" className="text-gray-400 hover:text-primary transition-colors">
-                  Sitemap
-                </Link>
-              </div> */}
             </div>
           </motion.div>
         </div>
