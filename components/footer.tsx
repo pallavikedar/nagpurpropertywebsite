@@ -311,7 +311,11 @@ export default function Footer() {
                     <MapPin className="h-4 w-4 text-primary" />
                   </div>
                   <span className="text-gray-400 text-sm leading-relaxed flex-1">
+<<<<<<< HEAD
                    302, Sai Shraddha Appt., Behind White House Bungalow, Utkarsh Society, Dabha-Wadi Road, Nagpur - 440023
+=======
+                    302, Sai Shraddha Appt., Behind White House Bungalow, Utkarsh Society, Dabha-Wadi Road, Nagpur - 440023
+>>>>>>> abac998f36a5721ca3d689325f31d3735ec48452
                   </span>
                 </motion.li>
                 <motion.li variants={itemVariants} className="flex items-center gap-3 group">
