@@ -316,18 +316,18 @@ export default function MyPropertiesPage() {
                             <Eye className="h-3 w-3 mr-1" />
                             View
                           </Button>
-                          <Button
+                          {/* <Button
                             size="sm"
                             variant="outline"
                             onClick={() => router.push(`/edit-property/${property.id}`)}
                           >
                             <Edit className="h-3 w-3 mr-1" />
                             Edit
-                          </Button>
+                          </Button> */}
                         </div>
-                        <p className="text-xs text-gray-400">
+                        {/* <p className="text-xs text-gray-400">
                           Listed on {new Date(property.createdAt).toLocaleDateString()}
-                        </p>
+                        </p> */}
                       </div>
                     </CardContent>
                   </div>
