@@ -206,11 +206,11 @@ const Contact = () => {
               We'd love to hear from you. Whether you have a question about properties, 
               pricing, or anything else, our team is ready to answer all your questions.
             </p>
-            <div className={styles.heroBreadcrumb}>
+            {/* <div className={styles.heroBreadcrumb}>
               <a href="/">Home</a>
               <MdArrowForward className={styles.breadcrumbArrow} />
               <span>Contact Us</span>
-            </div>
+            </div> */}
           </motion.div>
         </div>
       </div>
