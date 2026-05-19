@@ -1553,6 +1553,13 @@
 
 
 
+
+
+
+
+
+
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -1580,7 +1587,6 @@ import {
 } from "lucide-react";
 
 // ─── Field Visibility Rules by Property Type ───────────────────────────────
-// Define which fields each property type supports
 const PROPERTY_TYPE_CONFIG: Record<
   string,
   { showBedrooms: boolean; showBathrooms: boolean; showFurnishing: boolean }
@@ -1593,6 +1599,70 @@ const PROPERTY_TYPE_CONFIG: Record<
 };
 
 const DEFAULT_CONFIG = { showBedrooms: true, showBathrooms: true, showFurnishing: true };
+
+const IMAGE_COMPRESSION_THRESHOLD = 5 * 1024 * 1024; // 5 MB
+
+// ─── Image Compression Helper ─────────────────────────────────────────────
+async function compressImage(file: File, quality = 0.7): Promise<File> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+
+        // Scale down if very large (max 2400px on longest side)
+        const MAX_DIM = 2400;
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) { resolve(file); return; }
+            const compressed = new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+            resolve(compressed);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ─── Session-aware fetch wrapper ──────────────────────────────────────────
+async function authorizedFetch(url: string, options: RequestInit): Promise<Response> {
+  const response = await fetch(url, options);
+
+  if (response.status === 401 || response.status === 403) {
+    // Session expired — clear tokens and redirect to login
+    localStorage.removeItem("usertoken");
+    localStorage.removeItem("admintoken");
+    window.location.href = "/Login";
+    // Return a dummy rejected promise so the caller doesn't continue
+    throw new Error("Session expired. Redirecting to login...");
+  }
+
+  return response;
+}
 
 export default function AddPropertyPage() {
   const { translations } = useLanguage();
@@ -1623,12 +1693,12 @@ export default function AddPropertyPage() {
 
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [compressingImages, setCompressingImages] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
 
-  // ─── Derive visibility config from selected property type ─────────────────
   const typeConfig =
     formData.propertyType
       ? PROPERTY_TYPE_CONFIG[formData.propertyType] ?? DEFAULT_CONFIG
@@ -1642,6 +1712,15 @@ export default function AddPropertyPage() {
     { title: t.ContactInformation,  icon: User         },
     { title: t.propertyImages,      icon: Camera       },
   ];
+
+  // ─── Check token on mount (catch already-expired sessions) ───────────────
+  useEffect(() => {
+    const userToken  = localStorage.getItem("usertoken");
+    const adminToken = localStorage.getItem("admintoken");
+    if (!userToken && !adminToken) {
+      window.location.href = "/Login";
+    }
+  }, []);
 
   // Cleanup image previews on unmount
   useEffect(() => {
@@ -1661,15 +1740,12 @@ export default function AddPropertyPage() {
   const handleSelectChange = (id: string, value: string) => {
     setFormData((prev) => {
       const updated = { ...prev, [id]: value };
-
-      // When property type changes, clear fields that are not applicable
       if (id === "propertyType") {
         const config = PROPERTY_TYPE_CONFIG[value] ?? DEFAULT_CONFIG;
-        if (!config.showBedrooms)  updated.bedrooms  = "";
-        if (!config.showBathrooms) updated.bathrooms = "";
+        if (!config.showBedrooms)   updated.bedrooms   = "";
+        if (!config.showBathrooms)  updated.bathrooms  = "";
         if (!config.showFurnishing) updated.furnishing = "";
       }
-
       return updated;
     });
     if (error) setError("");
@@ -1685,17 +1761,38 @@ export default function AddPropertyPage() {
     });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      if (images.length + newFiles.length > 10) {
-        setError("You can upload a maximum of 10 images");
-        return;
-      }
-      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
-      setImages((prev) => [...prev, ...newFiles]);
+  // ─── Image selection with auto-compression ───────────────────────────────
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+
+    const newFiles = Array.from(e.target.files);
+    if (images.length + newFiles.length > 10) {
+      setError("You can upload a maximum of 10 images");
+      return;
+    }
+
+    setError("");
+    setCompressingImages(true);
+
+    try {
+      const processedFiles = await Promise.all(
+        newFiles.map(async (file) => {
+          if (file.size > IMAGE_COMPRESSION_THRESHOLD) {
+            return await compressImage(file, 0.7);
+          }
+          return file;
+        })
+      );
+
+      const newPreviews = processedFiles.map((file) => URL.createObjectURL(file));
+      setImages((prev) => [...prev, ...processedFiles]);
       setImagePreviews((prev) => [...prev, ...newPreviews]);
-      setError("");
+    } catch {
+      setError("Failed to process one or more images. Please try again.");
+    } finally {
+      setCompressingImages(false);
+      // Reset file input so the same file can be re-selected if needed
+      e.target.value = "";
     }
   };
 
@@ -1707,17 +1804,14 @@ export default function AddPropertyPage() {
 
   // ─── Validation ────────────────────────────────────────────────────────────
   const validateForm = () => {
-    // Basic Information
     if (!formData.title.trim())       return "Please enter property title";
     if (!formData.description.trim()) return "Please enter property description";
     if (!formData.propertyFor)        return "Please select property purpose";
     if (!formData.propertyType)       return "Please select property type";
 
-    // Property Details
     if (!formData.price || parseFloat(formData.price) <= 0) return "Please enter valid price";
     if (!formData.area  || parseFloat(formData.area)  <= 0) return "Please enter valid area";
 
-    // Only validate bedroom/bathroom/furnishing when visible
     if (typeConfig.showBedrooms  && (!formData.bedrooms  || parseInt(formData.bedrooms)  < 0))
       return "Please enter valid number of bedrooms";
     if (typeConfig.showBathrooms && (!formData.bathrooms || parseInt(formData.bathrooms) < 0))
@@ -1725,7 +1819,6 @@ export default function AddPropertyPage() {
     if (typeConfig.showFurnishing && !formData.furnishing)
       return "Please select furnishing status";
 
-    // Location
     if (!formData.address.trim())  return "Please enter address";
     if (!formData.locality.trim()) return "Please enter locality";
     if (!formData.city.trim())     return "Please enter city";
@@ -1733,14 +1826,12 @@ export default function AddPropertyPage() {
     if (!formData.pincode.trim() || !/^\d{6}$/.test(formData.pincode))
       return "Please enter valid 6-digit pincode";
 
-    // Contact
     if (!formData.ownerName.trim()) return "Please enter owner/agent name";
     if (!formData.ownerPhone.trim() || !/^\d{10}$/.test(formData.ownerPhone))
       return "Please enter valid 10-digit phone number";
     if (!formData.ownerEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.ownerEmail))
       return "Please enter valid email address";
 
-    // Images
     if (images.length === 0) return "Please upload at least one property image";
 
     return null;
@@ -1766,8 +1857,8 @@ export default function AddPropertyPage() {
       const token      = userToken || adminToken;
 
       if (!token) {
-        setError("Please log in to submit a property");
-        setTimeout(() => { window.location.href = "/Login"; }, 2000);
+        setError("Your session has expired. Redirecting to login...");
+        setTimeout(() => { window.location.href = "/Login"; }, 1500);
         return;
       }
 
@@ -1775,10 +1866,10 @@ export default function AddPropertyPage() {
 
       const propertyData = {
         ...formData,
-        price:    parseFloat(formData.price),
-        area:     parseFloat(formData.area),
-        bedrooms: typeConfig.showBedrooms  ? parseInt(formData.bedrooms,  10) : undefined,
-        bathrooms:typeConfig.showBathrooms ? parseInt(formData.bathrooms, 10) : undefined,
+        price:     parseFloat(formData.price),
+        area:      parseFloat(formData.area),
+        bedrooms:  typeConfig.showBedrooms   ? parseInt(formData.bedrooms,  10) : undefined,
+        bathrooms: typeConfig.showBathrooms  ? parseInt(formData.bathrooms, 10) : undefined,
         furnishing: typeConfig.showFurnishing ? formData.furnishing : undefined,
       };
 
@@ -1788,7 +1879,8 @@ export default function AddPropertyPage() {
       );
       images.forEach((image) => formDataToSend.append("images", image));
 
-      const response = await fetch(`${BASE_URL}/addProperty`, {
+      // Uses session-aware fetch — auto-redirects on 401/403
+      const response = await authorizedFetch(`${BASE_URL}/addProperty`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formDataToSend,
@@ -1799,8 +1891,12 @@ export default function AddPropertyPage() {
         throw new Error(errorData?.message || "Failed to submit property");
       }
 
-      setSuccess("Property submitted successfully! Redirecting...");
+      // ── Success: detailed confirmation message ────────────────────────────
+      setSuccess(
+        "🎉 Property submitted successfully! Admin will review your property. Check your property status in My Property page."
+      );
 
+      // Reset form
       setFormData({
         title: "", description: "", propertyFor: "", propertyType: "",
         price: "", area: "", bedrooms: "", bathrooms: "", furnishing: "",
@@ -1812,10 +1908,14 @@ export default function AddPropertyPage() {
       imagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
       setImages([]);
       setImagePreviews([]);
+      setCurrentSection(0);
 
-      setTimeout(() => { window.location.href = "/myproperty"; }, 1000);
+      setTimeout(() => { window.location.href = "/myproperty"; }, 3000);
     } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+      // Don't overwrite the session-expiry redirect with a generic error
+      if (err.message !== "Session expired. Redirecting to login...") {
+        setError(err.message || "Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -1921,10 +2021,19 @@ export default function AddPropertyPage() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3 text-green-700"
+                    className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3 text-green-700"
                   >
-                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                    <p>{success}</p>
+                    <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Property Submitted Successfully!</p>
+                      <p className="text-sm mt-1">
+                        Admin will review your property. You can check the status on the{" "}
+                        <a href="/myproperty" className="underline font-medium hover:text-green-800">
+                          My Property
+                        </a>{" "}
+                        page. Redirecting in a moment…
+                      </p>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -2015,7 +2124,6 @@ export default function AddPropertyPage() {
                           </div>
                         </div>
 
-                        {/* Contextual hint when plot is selected */}
                         {formData.propertyType === "Plot" && (
                           <motion.div
                             initial={{ opacity: 0, y: -8 }}
@@ -2026,7 +2134,6 @@ export default function AddPropertyPage() {
                           </motion.div>
                         )}
 
-                        {/* Contextual hint when commercial is selected */}
                         {formData.propertyType === "Commercial" && (
                           <motion.div
                             initial={{ opacity: 0, y: -8 }}
@@ -2053,7 +2160,6 @@ export default function AddPropertyPage() {
                     >
                       <h2 className="text-2xl font-bold mb-6 text-gray-800">{t.PropertyDetails}</h2>
 
-                      {/* Property type badge reminder */}
                       {formData.propertyType && (
                         <div className="mb-5 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
                           <span>📋</span>
@@ -2063,7 +2169,6 @@ export default function AddPropertyPage() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                        {/* Price — always shown */}
                         <div>
                           <Label htmlFor="price" className="text-gray-700 font-medium mb-2 block">
                             {t.Price} (₹) <span className="text-red-500">*</span>
@@ -2079,7 +2184,6 @@ export default function AddPropertyPage() {
                           />
                         </div>
 
-                        {/* Area — always shown */}
                         <div>
                           <Label htmlFor="area" className="text-gray-700 font-medium mb-2 block">
                             {t.Area} ({t.sqft}) <span className="text-red-500">*</span>
@@ -2095,7 +2199,6 @@ export default function AddPropertyPage() {
                           />
                         </div>
 
-                        {/* Bedrooms — hidden for Plot & Commercial */}
                         {typeConfig.showBedrooms && (
                           <motion.div
                             initial={{ opacity: 0, scale: 0.97 }}
@@ -2124,7 +2227,6 @@ export default function AddPropertyPage() {
                           </motion.div>
                         )}
 
-                        {/* Bathrooms — hidden for Plot only */}
                         {typeConfig.showBathrooms && (
                           <motion.div
                             initial={{ opacity: 0, scale: 0.97 }}
@@ -2152,7 +2254,6 @@ export default function AddPropertyPage() {
                           </motion.div>
                         )}
 
-                        {/* Furnishing — hidden for Plot only */}
                         {typeConfig.showFurnishing && (
                           <motion.div
                             initial={{ opacity: 0, scale: 0.97 }}
@@ -2179,14 +2280,13 @@ export default function AddPropertyPage() {
                           </motion.div>
                         )}
 
-                        {/* Plot-specific info message */}
                         {formData.propertyType === "Plot" && (
                           <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             className="md:col-span-2 p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-600 text-sm"
                           >
-                            🏞️ <strong>Plot properties</strong> only require price and area — bedroom, bathroom, and furnishing details are not applicable for land/plot type properties.
+                            🏞️ <strong>Plot properties</strong> only require price and area — bedroom, bathroom, and furnishing details are not applicable.
                           </motion.div>
                         )}
 
@@ -2400,14 +2500,30 @@ export default function AddPropertyPage() {
                             accept="image/*"
                             onChange={handleImageChange}
                             className="hidden"
+                            disabled={compressingImages}
                           />
                           <label htmlFor="images" className="cursor-pointer block">
-                            <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                            <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
-                            <p className="text-sm text-gray-500">PNG, JPG, JPEG up to 10MB each (Max 10 images)</p>
-                            <Button type="button" variant="outline" className="mt-4">
-                              Select Images
-                            </Button>
+                            {compressingImages ? (
+                              <>
+                                <Loader2 className="w-12 h-12 mx-auto text-primary mb-3 animate-spin" />
+                                <p className="text-gray-600 mb-2 font-medium">Compressing images…</p>
+                                <p className="text-sm text-gray-500">Images over 5 MB are automatically compressed</p>
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                                <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
+                                <p className="text-sm text-gray-500">
+                                  PNG, JPG, JPEG up to 10 MB each (Max 10 images)
+                                </p>
+                                <p className="text-xs text-blue-500 mt-1">
+                                  Images over 5 MB will be automatically compressed
+                                </p>
+                                <Button type="button" variant="outline" className="mt-4" disabled={compressingImages}>
+                                  Select Images
+                                </Button>
+                              </>
+                            )}
                           </label>
                         </div>
 
@@ -2427,6 +2543,10 @@ export default function AddPropertyPage() {
                                 >
                                   <X className="w-4 h-4" />
                                 </button>
+                                {/* Show file size badge */}
+                                <span className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded">
+                                  {(images[index]?.size / 1024 / 1024).toFixed(1)} MB
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -2466,7 +2586,7 @@ export default function AddPropertyPage() {
                       type="submit"
                       size="lg"
                       className="px-8 ml-auto"
-                      disabled={loading}
+                      disabled={loading || compressingImages}
                     >
                       {loading ? (
                         <>

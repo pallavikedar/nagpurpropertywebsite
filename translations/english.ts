@@ -297,4 +297,120 @@ statusRent: "For Rent",
 
 
 
+contact: {
+    // ── Hero ──────────────────────────────────────────────
+    heroBadge: "Get in Touch",
+    heroTitle: "Contact Us",
+    heroDescription:
+      "We'd love to hear from you. Whether you have a question about properties, pricing, or anything else, our team is ready to answer all your questions.",
+ 
+    // ── Info Cards ────────────────────────────────────────
+    phoneTitle: "Phone Numbers",
+    addressTitle: "Office Address",
+    emailTitle: "Email Us",
+    hoursTitle: "Business Hours",
+    chatWhatsApp: "Chat on WhatsApp",
+ 
+    addressLines: [
+      "302, Sai Shraddha Appt.",
+      "Behind White House Bungalow,",
+      "Utkarsh Society, Dabha-Wadi Road,",
+      "Nagpur - 440023",
+    ],
+    hoursLines: [
+      { text: "Mon - Fri: 9:00 AM – 6:00 PM", closed: false },
+      { text: "Sat: 10:00 AM – 4:00 PM", closed: false },
+      { text: "Sunday: Closed", closed: true },
+    ],
+ 
+    // ── Why Choose Us ─────────────────────────────────────
+    whyChooseTitle: "Why Choose Us",
+    whyChooseSubtitle: "We make property transactions smooth and hassle-free",
+    whyChooseItems: [
+      {
+        title: "Trusted by Thousands",
+        description: "Over 5000+ happy customers and counting",
+      },
+      {
+        title: "Expert Guidance",
+        description: "Professional advice at every step",
+      },
+      {
+        title: "Quick Response",
+        description: "Average response time under 2 hours",
+      },
+      {
+        title: "Wide Property Range",
+        description: "500+ properties available",
+      },
+    ],
+ 
+    // ── Quick Contact ─────────────────────────────────────
+    quickContactTitle: "Quick Contact",
+    support24Label: "24/7 Customer Support",
+    support24Text: "Our team is always ready to help you",
+    whatsAppLabel: "WhatsApp Us",
+    whatsAppLinkText: "Click here to chat on WhatsApp",
+ 
+    // ── Emergency ─────────────────────────────────────────
+    emergencyTitle: "Emergency Contact",
+    emergencyText: "For urgent matters, call us directly:",
+    emergencyNote: "Available 24/7 for emergencies",
+ 
+    // ── Response Time ─────────────────────────────────────
+    responseTitle: "Response Time",
+    responseText: "Average response time: Under 2 hours",
+ 
+    // ── Map ───────────────────────────────────────────────
+    mapTitle: "Find Us Here",
+    mapSubtitle:
+      "Visit our office for a face-to-face consultation. We'd love to meet you!",
+    mapLocation: "Nagpur, Maharashtra",
+ 
+    // ── FAQ ───────────────────────────────────────────────
+    faqTitle: "Frequently Asked Questions",
+    faqSubtitle: "Find answers to common questions about our services",
+    faqs: [
+      {
+        question: "What types of properties do you offer?",
+        answer:
+          "We offer a wide range of properties including residential apartments, independent houses, luxury villas, commercial spaces, and plots for development.",
+      },
+      {
+        question: "How can I schedule a property visit?",
+        answer:
+          "You can schedule a property visit by filling out the contact form, calling us directly, or sending us an email. Our team will get back to you within 24 hours to arrange a convenient time.",
+      },
+      {
+        question: "Do you offer property management services?",
+        answer:
+          "Yes, we offer comprehensive property management services including tenant finding, rent collection, maintenance, and property upkeep.",
+      },
+      {
+        question: "What are your service charges?",
+        answer:
+          "Our service charges vary depending on the type of property and services required. Please contact us for a detailed quote tailored to your specific needs.",
+      },
+      {
+        question: "Is there any consultation fee?",
+        answer:
+          "Initial consultation is completely free. We believe in building long-term relationships with our clients.",
+      },
+      {
+        question: "How do I verify property ownership?",
+        answer:
+          "We verify all legal documents and property ownership before listing. All our properties come with clear titles and necessary approvals.",
+      },
+    ],
+ 
+    // ── CTA ───────────────────────────────────────────────
+    ctaTitle: "Ready to Find Your Dream Property?",
+    ctaText:
+      "Let us help you find the perfect property that matches your needs and budget.",
+    ctaBrowse: "Browse Properties",
+  },
+
+
+
+
 }
