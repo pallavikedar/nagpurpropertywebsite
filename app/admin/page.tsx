@@ -205,10 +205,10 @@ export default function AdminDashboard() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button variant="outline" className="gap-2">
+              {/* <Button variant="outline" className="gap-2">
                 <Download className="h-4 w-4" />
                 Export Report
-              </Button>
+              </Button> */}
               <Button 
                 className="gap-2 bg-gradient-to-r from-primary to-primary/70 hover:shadow-lg transition-all"
                 onClick={() => window.location.reload()}
