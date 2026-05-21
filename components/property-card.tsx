@@ -192,16 +192,7 @@ export default function PropertyCard({ filters = null, searchTrigger = 0 }) {
     <div className="container mx-auto px-4 py-8" id="properties-section">
       {/* Results Header */}
       <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        {/* <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            {filteredProperties.length} Properties Found
-          </h2>
-          <p className="text-gray-500 mt-1">
-            {filteredProperties.length === allProperties.length 
-              ? "Showing all available properties" 
-              : `Showing ${filteredProperties.length} of ${allProperties.length} properties matching your criteria`}
-          </p>
-        </div> */}
+        
         
         {filteredProperties.length !== allProperties.length && (
           <Button 
