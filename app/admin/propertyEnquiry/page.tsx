@@ -11,7 +11,7 @@ import {
   LayoutDashboard, 
   LogOut, 
   Settings, 
-  Users,
+  Users, 
   Handshake,
   Eye,
   X,

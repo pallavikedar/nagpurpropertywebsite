@@ -1193,7 +1193,7 @@ export default function UpdatePropertyPage() {
                           <SelectValue placeholder="Select option" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Sale">For Sale</SelectItem>
+                          <SelectItem value="Sale">For Sell</SelectItem>
                           <SelectItem value="Rent">For Rent</SelectItem>
                         </SelectContent>
                       </Select>
