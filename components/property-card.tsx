@@ -253,7 +253,7 @@ export default function PropertyCard({ filters = null, searchTrigger = 0 }) {
                           : "bg-green-500 hover:bg-green-600"
                       )}
                     >
-                      {property.propertyFor === "rent" || property.type === "rent" ? "For Rent" : "For Sale"}
+                      {property.propertyFor === "rent" || property.type === "rent" ? "For Rent" : "For Sell"}
                     </Badge>
 
                     <button
