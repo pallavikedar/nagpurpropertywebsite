@@ -1103,7 +1103,7 @@ export default function AddPropertyPage() {
   }, [formData]);
 
   const validateFileField = useCallback((name: string): string => {
-    if (name === "document" && f?.document && !docFile) return "Please upload the required document";
+    // if (name === "document" && f?.document && !docFile) return "Please upload the required document";
     if (name === "images" && images.length === 0) return "Upload at least one property image";
     return "";
   }, [f, docFile, images]);
@@ -1691,10 +1691,12 @@ export default function AddPropertyPage() {
                           </div>
 
                           {/* Document (7/12 / sale deed) */}
-                          <SingleUpload label={`Document ${formData.category === "Farmland" ? "(7/12)" : ""}`} required
+                          {/* <SingleUpload label={`Document ${formData.category === "Farmland" ? "(7/12)" : ""}`} required
+                            file={docFile} error={fieldErrors.document} accept={DOC_ACCEPT}
+                            onChange={handleSingleFile(setDocFile, "document", "doc")} onClear={() => setDocFile(null)} /> */}
+                               <SingleUpload label={`Document ${formData.category === "Farmland" ? "(7/12)" : ""} (optional)`}
                             file={docFile} error={fieldErrors.document} accept={DOC_ACCEPT}
                             onChange={handleSingleFile(setDocFile, "document", "doc")} onClear={() => setDocFile(null)} />
-
                           {/* Layout map */}
                           {f?.layoutMap && (
                             <SingleUpload label="Layout Map" file={layoutMapFile} error={fieldErrors.layoutMap} accept={DOC_ACCEPT}

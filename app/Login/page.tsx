@@ -24,6 +24,16 @@ import {
   Shield
 } from "lucide-react";
 
+// Keys that make up an authenticated session, grouped by role.
+// Clearing the *other* role's keys on every login is what prevents a stale
+// admin/user session from leaking into a freshly-logged-in tab.
+const ADMIN_KEYS = ["admintoken", "adminLoggedIn", "adminName", "adminEmail"];
+const USER_KEYS = ["usertoken", "userLoggedIn", "userName", "userEmail"];
+
+function clearAuthKeys(keys) {
+  keys.forEach((k) => localStorage.removeItem(k));
+}
+
 export default function LoginPage() {
   const { translations } = useLanguage();
   const t = translations;
@@ -83,6 +93,14 @@ export default function LoginPage() {
         
         // Only access localStorage in browser
         if (typeof window !== 'undefined') {
+          // Always start from a clean slate: whichever role just logged in,
+          // wipe out any leftover session data from the OTHER role first.
+          // Without this, an old usertoken/userName sitting in localStorage
+          // can silently win over a brand-new admin login (or vice versa),
+          // including in a newly opened tab that reads the same localStorage.
+          clearAuthKeys(ADMIN_KEYS);
+          clearAuthKeys(USER_KEYS);
+
           if (data.admin) {
             roleName = data.admin.role[0].roleName;
             localStorage.setItem("admintoken", data.jwtToken);
@@ -104,6 +122,11 @@ export default function LoginPage() {
           }
 
           localStorage.setItem("role", roleName);
+
+          // The native "storage" event only fires in OTHER tabs, never the tab
+          // that made the change — so the Navbar in THIS tab won't hear about
+          // the login otherwise. Dispatch a custom event it can also listen for.
+          window.dispatchEvent(new Event("authChange"));
         }
 
         // Redirect based on role

@@ -59,25 +59,36 @@ function NavbarDashboard() {
   const profileMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
-  // Check login status - optimized
+  // Check login status.
+  //
+  // This Navbar belongs to the PUBLIC/customer-facing site (Properties, Add
+  // Property, Legal Consultancy, etc.) — not the admin dashboard. It must
+  // only reflect a "usertoken" session. An admin token existing in
+  // localStorage should NOT make this navbar show "Signed in as Admin":
+  // the admin session belongs to /admin and is a completely separate
+  // concern from a visitor browsing the public site. Without this
+  // restriction, logging into /admin and then opening the public site in a
+  // new tab (same localStorage) would incorrectly show the admin as
+  // logged in here.
   useEffect(() => {
     const checkLoginStatus = () => {
       const userToken = localStorage.getItem("usertoken");
-      const adminToken = localStorage.getItem("admintoken");
-      const token = userToken || adminToken;
-      const loggedIn = !!token;
-      
-      setIsLoggedIn(loggedIn);
-      
-      if (loggedIn) {
-        const storedName = localStorage.getItem("userName") || localStorage.getItem("adminName") || "User";
-        setUserName(storedName);
-      }
+      const name = localStorage.getItem("userName") || "User";
+
+      setIsLoggedIn(!!userToken);
+      setUserName(userToken ? name : "");
     };
     
     checkLoginStatus();
+    // "storage" only fires in OTHER tabs when localStorage changes.
     window.addEventListener("storage", checkLoginStatus);
-    return () => window.removeEventListener("storage", checkLoginStatus);
+    // "authChange" is a custom event the Login/Logout flows dispatch so THIS
+    // tab also picks up the change immediately (storage alone won't fire here).
+    window.addEventListener("authChange", checkLoginStatus);
+    return () => {
+      window.removeEventListener("storage", checkLoginStatus);
+      window.removeEventListener("authChange", checkLoginStatus);
+    };
   }, []);
 
   // Handle scroll effect - passive for performance
@@ -137,9 +148,15 @@ function NavbarDashboard() {
     localStorage.removeItem("adminName");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("adminEmail");
+    localStorage.removeItem("userLoggedIn");
+    localStorage.removeItem("adminLoggedIn");
+    localStorage.removeItem("role");
     setIsLoggedIn(false);
+    setUserName("");
     setIsProfileMenuOpen(false);
     setIsMenuOpen(false);
+    // Let any other open tab know the session is gone.
+    window.dispatchEvent(new Event("authChange"));
     router.push("/");
   }, [router]);
 

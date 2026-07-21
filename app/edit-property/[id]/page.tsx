@@ -268,7 +268,7 @@ export default function OpenEditPropertyPage() {
   }, [formData]);
 
   const validateFileField = useCallback((name: string): string => {
-    if (name === "document" && f?.document && !docFile && !existingMedia.doc) return "Please upload the required document";
+    // if (name === "document" && f?.document && !docFile && !existingMedia.doc) return "Please upload the required document";
     if (name === "images" && images.length === 0 && existingImages.length === 0) return "At least one property image is required";
     return "";
   }, [f, docFile, existingMedia.doc, images, existingImages]);
@@ -764,7 +764,7 @@ export default function OpenEditPropertyPage() {
                     </div>
 
                     {/* Document */}
-                    <MediaUpload label={`Document ${formData.category === "Farmland" ? "(7/12)" : ""}`} required
+                    <MediaUpload label={`Document ${formData.category === "Farmland" ? "(7/12)" : ""} (optional)`} 
                       file={docFile} existingUrl={existingMedia.doc} error={fieldErrors.document} accept={DOC_ACCEPT}
                       onChange={handleSingleFile(setDocFile, "document", "doc")} onClear={() => setDocFile(null)} />
 
