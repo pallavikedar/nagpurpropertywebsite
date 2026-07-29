@@ -767,8 +767,6 @@
 
 
 
-
-
 "use client";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import Image from "next/image";
@@ -963,6 +961,13 @@ function formatPrice(price: number, type: string) {
 /* actual image has decoded, then cross-fades in. This is what makes the     */
 /* "data loads, then images pop in progressively" behavior feel smooth       */
 /* instead of jarring, without blocking the rest of the page on image load.  */
+/*                                                                            */
+/* NOTE: next/image validates the src's hostname against next.config.js's    */
+/* images.remotePatterns BEFORE issuing any network request. If a hostname   */
+/* isn't allow-listed, it throws a console error and never mounts the real   */
+/* <img> tag — so neither onLoad NOR onError ever fires, and the skeleton    */
+/* spins forever with zero feedback. The timeout below is a safety net that  */
+/* forces a visible "Image unavailable" state instead of a silent dead box.  */
 /* -------------------------------------------------------------------------- */
 function SmartImage({
   src,
@@ -988,6 +993,15 @@ function SmartImage({
   useEffect(() => {
     setLoaded(false);
     setErrored(false);
+
+    const timeout = setTimeout(() => {
+      setLoaded((prevLoaded) => {
+        if (!prevLoaded) setErrored(true);
+        return prevLoaded;
+      });
+    }, 8000);
+
+    return () => clearTimeout(timeout);
   }, [src]);
 
   return (
@@ -1096,14 +1110,15 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     return () => controller.abort();
   }, [id]);
 
-  const allImages = useMemo(
-    () => (property?.images.length ? property.images : ["/api/placeholder/1200/800"]),
-    [property]
-  );
+  // allImages no longer falls back to a fake "/api/placeholder/1200/800" path —
+  // that route doesn't exist and always 404'd. If there are no real images,
+  // hasImages guards the render and shows a clean empty state instead.
+  const allImages = useMemo(() => property?.images ?? [], [property]);
+  const hasImages = allImages.length > 0;
   const hasMultipleImages = allImages.length > 1;
   const remainingImages = allImages.slice(1, 5);
   const hasMoreImages = allImages.length > 5;
-  const selectedImage = allImages[selectedIndex] ?? allImages[0];
+  const selectedImage = hasImages ? allImages[selectedIndex] ?? allImages[0] : undefined;
 
   const goToImage = useCallback((idx: number) => setSelectedIndex(idx), []);
   const nextThumb = useCallback(
@@ -1124,10 +1139,13 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
     [allImages.length]
   );
 
-  const openLightbox = useCallback(() => {
-    setLightboxIndex(selectedIndex);
-    setIsLightboxOpen(true);
-  }, [selectedIndex]);
+  const openLightbox = useCallback(
+    (idx?: number) => {
+      setLightboxIndex(idx ?? selectedIndex);
+      setIsLightboxOpen(true);
+    },
+    [selectedIndex]
+  );
 
   // Keyboard navigation for the lightbox (esc / arrows) — small UX win, cheap to add.
   useEffect(() => {
@@ -1326,16 +1344,58 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
               {/* Main Image */}
               <div className="lg:col-span-3">
                 <div className="relative aspect-[16/9] rounded-2xl shadow-lg group cursor-pointer">
-                  <SmartImage
-                    src={selectedImage}
-                    alt={property.title}
-                    className="absolute inset-0 rounded-2xl"
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 75vw"
-                    onClick={openLightbox}
-                  />
+                  {hasImages ? (
+                    <>
+                      <SmartImage
+                        src={selectedImage as string}
+                        alt={property.title}
+                        className="absolute inset-0 rounded-2xl"
+                        priority
+                        sizes="(max-width: 1024px) 100vw, 75vw"
+                        onClick={() => openLightbox(selectedIndex)}
+                      />
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-2xl" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-2xl" />
+
+                      {hasMultipleImages && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              prevThumb();
+                            }}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/95 hover:bg-white rounded-full shadow-lg transition-all hover:scale-110 opacity-0 group-hover:opacity-100 backdrop-blur-sm z-10"
+                          >
+                            <ChevronLeft className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              nextThumb();
+                            }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/95 hover:bg-white rounded-full shadow-lg transition-all hover:scale-110 opacity-0 group-hover:opacity-100 backdrop-blur-sm z-10"
+                          >
+                            <ChevronRightIcon className="h-5 w-5" />
+                          </button>
+                        </>
+                      )}
+
+                      <div className="absolute bottom-4 right-4 bg-black/70 hover:bg-black text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm transition-all z-10">
+                        🔍 Click to enlarge
+                      </div>
+
+                      {hasMultipleImages && (
+                        <div className="absolute bottom-4 left-4 bg-black/70 text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm z-10">
+                          {selectedIndex + 1} / {allImages.length}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 rounded-2xl text-gray-400">
+                      <Home className="h-10 w-10 mb-2" />
+                      <p className="text-sm">No photos available</p>
+                    </div>
+                  )}
 
                   <button
                     onClick={(e) => {
@@ -1357,39 +1417,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                   >
                     <Share2 className="h-5 w-5 text-gray-700" />
                   </button>
-
-                  {hasMultipleImages && (
-                    <>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          prevThumb();
-                        }}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/95 hover:bg-white rounded-full shadow-lg transition-all hover:scale-110 opacity-0 group-hover:opacity-100 backdrop-blur-sm z-10"
-                      >
-                        <ChevronLeft className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          nextThumb();
-                        }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/95 hover:bg-white rounded-full shadow-lg transition-all hover:scale-110 opacity-0 group-hover:opacity-100 backdrop-blur-sm z-10"
-                      >
-                        <ChevronRightIcon className="h-5 w-5" />
-                      </button>
-                    </>
-                  )}
-
-                  <div className="absolute bottom-4 right-4 bg-black/70 hover:bg-black text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm transition-all z-10">
-                    🔍 Click to enlarge
-                  </div>
-
-                  {hasMultipleImages && (
-                    <div className="absolute bottom-4 left-4 bg-black/70 text-white text-xs px-2 py-1 rounded-md backdrop-blur-sm z-10">
-                      {selectedIndex + 1} / {allImages.length}
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -1399,7 +1426,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                   {remainingImages.map((img, i) => (
                     <button
                       key={img + i}
-                      onClick={() => goToImage(i + 1)}
+                      onClick={() => {
+                        setSelectedIndex(i + 1);
+                        openLightbox(i + 1);
+                      }}
                       className={`relative rounded-xl transition-all ${
                         selectedIndex === i + 1 ? "ring-2 ring-primary ring-offset-2" : "hover:ring-2 hover:ring-gray-300"
                       }`}
@@ -1429,7 +1459,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
         </section>
 
         {/* Lightbox */}
-        {isLightboxOpen && (
+        {isLightboxOpen && hasImages && (
           <div
             className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center"
             onClick={() => setIsLightboxOpen(false)}
@@ -1550,9 +1580,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                               <span className="text-gray-500">Listed By</span>
                               <span className="font-medium text-gray-900">{property.ownerName}</span>
                             </div>
-                            {/* Furnishing & parking only apply to a built residential unit —
-                                a Plot or Farmland listing has neither — and each row only
-                                renders when there's an actual value, never a placeholder. */}
                             {!isLand && property.furnishing && (
                               <div className="flex justify-between py-2 border-b">
                                 <span className="text-gray-500">Furnishing Status</span>
@@ -1580,8 +1607,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                           </div>
                           <div className="space-y-3">
                             <h4 className="font-semibold text-gray-900 mb-3">Additional Info</h4>
-                            {/* Floor number and year built are meaningless for land, and each
-                                only renders here when the data actually has a value. */}
                             {!isLand && property.floorNumber != null && property.totalFloors != null && (
                               <div className="flex justify-between py-2 border-b">
                                 <span className="text-gray-500">Floor</span>
@@ -1594,7 +1619,6 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                                 <span className="font-medium text-gray-900">{property.yearBuilt}</span>
                               </div>
                             )}
-                            {/* Facing doesn't apply to Farmland either — only show when the data has it. */}
                             {property.facing && (
                               <div className="flex justify-between py-2 border-b">
                                 <span className="text-gray-500">Facing</span>
