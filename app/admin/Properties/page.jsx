@@ -1418,11 +1418,10 @@
 
 
 
-
-
 "use client";
 
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { BASE_URL } from "@/app/baseurl";
 import {
   Building,
@@ -1444,6 +1443,8 @@ import {
   User,
   Link2,
   Share2,
+  MessageCircle,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -1452,13 +1453,145 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import AdminSidebar from "@/components/admin-sidebar";
 
-const CACHE_KEY = "admin_properties_cache_v1";
+const CACHE_KEY = "admin_properties_cache_v2";
 const SEARCH_DEBOUNCE_MS = 250;
+const PAGE_SIZE = 2000;
+
+/* ------------------------------------------------------------------
+   LINKS — two different things, kept deliberately separate:
+   • editPropertyLink  -> private, no-login edit form  ("Copy Link" button)
+   • publicPropertyLink-> public listing page          ("Share" button)
+   Adjust the public path if your route differs.
+   ------------------------------------------------------------------ */
+const origin = () => (typeof window !== "undefined" ? window.location.origin : "");
+const editPropertyLink = (id) => `${origin()}/edit-property/${id}`;
+const publicPropertyLink = (id) => `${origin()}/properties/${id}`;
+const addPropertyLink = () => `${origin()}/open-addproperty`;
+
+function toArray(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.content)) return payload.content;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
+  return [];
+}
 
 function formatPrice(price) {
-  if (price >= 10000000) return `₹${(price / 10000000).toFixed(1)}Cr`;
-  if (price >= 100000) return `₹${(price / 100000).toFixed(1)}L`;
-  return `₹${price.toLocaleString()}`;
+  const n = Number(price);
+  if (!isFinite(n)) return "—";
+  if (n >= 10000000) return `₹${(n / 10000000).toFixed(1)}Cr`;
+  if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`;
+  return `₹${n.toLocaleString()}`;
+}
+
+/* Message used when sharing a property on WhatsApp. */
+function buildShareText(property) {
+  return [
+    `*${property.title || "Property"}*`,
+    property.price ? `Price: ${formatPrice(property.price)}` : null,
+    [property.address, property.city].filter(Boolean).join(", ") || null,
+    "",
+    publicPropertyLink(property.id),
+  ]
+    .filter((l) => l !== null)
+    .join("\n");
+}
+
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    window.prompt("Copy this:", text);
+    return false;
+  }
+}
+
+function openWhatsApp(text) {
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+}
+
+/* ------------------------------------------------------------------
+   ShareMenu — two choices only: WhatsApp or copy the public link.
+   Rendered into document.body via a portal because the table sits in an
+   overflow-x-auto wrapper that would otherwise clip it.
+   ------------------------------------------------------------------ */
+function ShareMenu({ onWhatsApp, onCopyLink, label = "Share", size = "sm" }) {
+  const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const [mounted, setMounted] = useState(false);
+  const btnRef = useRef(null);
+
+  useEffect(() => setMounted(true), []);
+
+  const toggle = useCallback(() => {
+    if (!btnRef.current) return;
+    const r = btnRef.current.getBoundingClientRect();
+    const MENU_W = 210;
+    setCoords({
+      top: r.bottom + 6,
+      left: Math.max(8, Math.min(r.left, window.innerWidth - MENU_W - 8)),
+    });
+    setOpen((o) => !o);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", close);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const run = (fn) => {
+    setOpen(false);
+    fn();
+  };
+
+  return (
+    <>
+      <Button ref={btnRef} variant="outline" size={size} onClick={toggle} className="gap-1" title="Share this property">
+        <Share2 className="h-3 w-3" />
+        <span className="hidden sm:inline">{label}</span>
+      </Button>
+
+      {mounted && open
+        ? createPortal(
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{ position: "fixed", top: coords.top, left: coords.left, width: 210, zIndex: 60 }}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="rounded-lg border border-gray-200 bg-white shadow-xl overflow-hidden py-1"
+            >
+              <button
+                onClick={() => run(onWhatsApp)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left transition-colors"
+              >
+                <MessageCircle className="h-4 w-4 text-green-600 shrink-0" />
+                WhatsApp
+              </button>
+              <button
+                onClick={() => run(onCopyLink)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left transition-colors"
+              >
+                <Globe className="h-4 w-4 text-gray-400 shrink-0" />
+                Copy public link
+              </button>
+            </motion.div>,
+            document.body
+          )
+        : null}
+    </>
+  );
 }
 
 function StatCard({ title, value, icon: Icon, color }) {
@@ -1477,12 +1610,6 @@ function StatCard({ title, value, icon: Icon, color }) {
   );
 }
 
-/* Thumbnail loads AFTER the row's text data is already on screen: the table
-   renders instantly from the fetched JSON, and each image is a separate
-   network request that starts only once its <tr> mounts, with
-   loading="lazy" additionally deferring anything scrolled out of view.
-   A skeleton pulse fills the space until the image actually decodes, so nothing
-   shifts layout when it pops in. */
 function PropertyThumbnail({ src, alt }) {
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
@@ -1513,15 +1640,16 @@ function PropertyThumbnail({ src, alt }) {
   );
 }
 
-/* One table row, memoized so a status change on one property (or a re-render
-   from typing in the search box) doesn't re-render every other row. Without
-   this, a table of a few hundred properties re-renders the whole table on
-   every keystroke, which is the main thing that made this page feel slow. */
 const PropertyRow = React.memo(function PropertyRow({
   property, selected, onToggleSelect, onView, onEdit, onCopyLink, onDelete, onStatusChange,
+  onShareWhatsApp, onShareCopyLink,
 }) {
-  // Adjust this if your API uses a different field name for the property photo.
-  const thumbSrc = property.images?.[0] || property.image || property.thumbnail || property.photo || null;
+  const thumbSrc =
+    (Array.isArray(property.images) ? property.images[0] : null) ||
+    property.image ||
+    property.thumbnail ||
+    property.photo ||
+    null;
 
   return (
     <tr className="hover:bg-gray-50 transition-colors">
@@ -1579,14 +1707,24 @@ const PropertyRow = React.memo(function PropertyRow({
             <Eye className="h-3 w-3" />
             <span className="hidden sm:inline">View</span>
           </Button>
+
           <Button variant="outline" size="sm" onClick={() => onEdit(property.id)} className="gap-1">
             <Edit2 className="h-3 w-3" />
             <span className="hidden sm:inline">Edit</span>
           </Button>
+
+          {/* Edit link — unchanged, single-purpose button, no menu */}
           <Button variant="outline" size="sm" onClick={() => onCopyLink(property.id)} className="gap-1" title="Copy a shareable, no-login edit link">
             <Link2 className="h-3 w-3" />
             <span className="hidden sm:inline">Copy Link</span>
           </Button>
+
+          {/* Share the public listing — separate from the edit link above */}
+          <ShareMenu
+            onWhatsApp={() => onShareWhatsApp(property)}
+            onCopyLink={() => onShareCopyLink(property)}
+          />
+
           <Button variant="destructive" size="sm" onClick={() => onDelete(property.id)} className="gap-1">
             <Trash2 className="h-3 w-3" />
             <span className="hidden sm:inline">Delete</span>
@@ -1604,8 +1742,8 @@ export default function AdminPropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const [searchInput, setSearchInput] = useState(""); // raw, every keystroke
-  const [searchTerm, setSearchTerm] = useState("");    // debounced, used for filtering
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
@@ -1618,7 +1756,6 @@ export default function AdminPropertiesPage() {
     setTimeout(() => setToastMessage(null), 3000);
   }, []);
 
-  // Debounce search so typing doesn't re-filter the whole list on every key.
   useEffect(() => {
     const handle = setTimeout(() => setSearchTerm(searchInput), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(handle);
@@ -1627,24 +1764,27 @@ export default function AdminPropertiesPage() {
   const fetchProperties = useCallback(async (signal) => {
     const token = localStorage.getItem("admintoken");
     if (!token) {
-      alert("You need to log in as an admin to view properties.");
       router.push("/Login");
-      return;
+      return null;
     }
-    // Single request — the whole dataset is fetched up front (not paginated
-    // page-by-page), so every property is in memory and rendered.
-    const response = await fetch(`${BASE_URL}/properties`, {
+
+    const response = await fetch(`${BASE_URL}/properties?page=0&size=${PAGE_SIZE}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       signal,
     });
-    if (!response.ok) throw new Error("Failed to fetch properties.");
-    return response.json();
+
+    if (response.status === 401 || response.status === 403) {
+      localStorage.removeItem("admintoken");
+      router.push("/Login");
+      return null;
+    }
+    if (!response.ok) throw new Error(`Failed to fetch properties (${response.status}).`);
+
+    const payload = await response.json();
+    return toArray(payload);
   }, [router]);
 
-  // Stale-while-revalidate: paint instantly from the last-seen list (if any),
-  // then refresh from the network in the background. This is what makes the
-  // page feel instant on repeat visits instead of showing a spinner every time.
   useEffect(() => {
     const controller = new AbortController();
     let hadCache = false;
@@ -1652,26 +1792,25 @@ export default function AdminPropertiesPage() {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          setProperties(parsed);
+        const list = toArray(JSON.parse(cached));
+        if (list.length > 0) {
+          setProperties(list);
           setLoading(false);
           hadCache = true;
         }
       }
     } catch {
-      // Corrupted cache — ignore, fall through to network fetch.
+      // Corrupted cache — ignore.
     }
 
     fetchProperties(controller.signal)
-      .then((data) => {
-        if (!data) return;
-        setProperties(data);
+      .then((list) => {
+        if (!list) return;
+        setProperties(list);
+        setError("");
         try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-        } catch {
-          // Storage full/disabled — non-fatal, just skip caching.
-        }
+          localStorage.setItem(CACHE_KEY, JSON.stringify(list));
+        } catch {}
       })
       .catch((err) => {
         if (err.name !== "AbortError" && !hadCache) {
@@ -1689,11 +1828,11 @@ export default function AdminPropertiesPage() {
   const refreshProperties = useCallback(async () => {
     setRefreshing(true);
     try {
-      const data = await fetchProperties();
-      if (data) {
-        setProperties(data);
+      const list = await fetchProperties();
+      if (list) {
+        setProperties(list);
         try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+          localStorage.setItem(CACHE_KEY, JSON.stringify(list));
         } catch {}
         setError("");
         showToast("Properties refreshed successfully!", "success");
@@ -1705,13 +1844,12 @@ export default function AdminPropertiesPage() {
     }
   }, [fetchProperties, showToast]);
 
-  // Filtering/sorting is derived state — compute it with useMemo instead of a
-  // second piece of state kept in sync via useEffect. That was causing an
-  // extra render on every properties/filter change; useMemo only recomputes
-  // when an actual dependency changes and skips the redundant render.
   const filteredProperties = useMemo(() => {
+    const source = Array.isArray(properties) ? properties : [];
     const term = searchTerm.toLowerCase();
-    let filtered = properties.filter((property) => {
+
+    let filtered = source.filter((property) => {
+      if (!property) return false;
       if (
         term &&
         !property.title?.toLowerCase().includes(term) &&
@@ -1728,28 +1866,54 @@ export default function AdminPropertiesPage() {
     filtered = [...filtered];
     switch (sortBy) {
       case "newest":
-        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         break;
       case "oldest":
-        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        filtered.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
         break;
       case "price-high":
-        filtered.sort((a, b) => b.price - a.price);
+        filtered.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
         break;
       case "price-low":
-        filtered.sort((a, b) => a.price - b.price);
+        filtered.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
         break;
       case "name-asc":
-        filtered.sort((a, b) => a.title?.localeCompare(b.title));
+        filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+        break;
+      default:
         break;
     }
     return filtered;
   }, [properties, searchTerm, statusFilter, typeFilter, sortBy]);
 
+  /* ------- Edit link (private, no-login form) — its own action ------- */
+  const handleCopyEditLink = useCallback(async (propertyId) => {
+    if (await copyToClipboard(editPropertyLink(propertyId))) {
+      showToast("Edit link copied to clipboard!", "success");
+    }
+  }, [showToast]);
+
+  const handleCopyAddPropertyLink = useCallback(async () => {
+    if (await copyToClipboard(addPropertyLink())) {
+      showToast("Add-property link copied to clipboard!", "success");
+    }
+  }, [showToast]);
+
+  /* ------- Share property (public listing) — its own action ------- */
+  const handleShareWhatsApp = useCallback((property) => {
+    openWhatsApp(buildShareText(property));
+  }, []);
+
+  const handleShareCopyLink = useCallback(async (property) => {
+    if (await copyToClipboard(publicPropertyLink(property.id))) {
+      showToast("Property link copied!", "success");
+    }
+  }, [showToast]);
+
   const handleStatusChange = useCallback(async (propertyId, newStatus) => {
-    // Optimistic update — flip the UI immediately, roll back only if the
-    // request actually fails, instead of waiting on the network round trip.
-    setProperties((prev) => prev.map((p) => (p.id === propertyId ? { ...p, status: newStatus } : p)));
+    setProperties((prev) =>
+      (Array.isArray(prev) ? prev : []).map((p) => (p.id === propertyId ? { ...p, status: newStatus } : p))
+    );
     try {
       const token = localStorage.getItem("admintoken");
       if (!token) {
@@ -1767,8 +1931,6 @@ export default function AdminPropertiesPage() {
       }
       showToast("Property status updated successfully!", "success");
     } catch (err) {
-      // Roll back — we don't know the prior status per-row here, so just
-      // re-sync from the server rather than guessing.
       refreshProperties();
       showToast(err.message || "Something went wrong.", "error");
     }
@@ -1793,7 +1955,7 @@ export default function AdminPropertiesPage() {
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.message || "Failed to delete property.");
       }
-      setProperties((prev) => prev.filter((p) => p.id !== propertyId));
+      setProperties((prev) => (Array.isArray(prev) ? prev : []).filter((p) => p.id !== propertyId));
       showToast("Property deleted successfully!", "success");
     } catch (err) {
       showToast(err.message || "Something went wrong.", "error");
@@ -1811,30 +1973,13 @@ export default function AdminPropertiesPage() {
     setSelectedProperties([]);
   }, [selectedProperties, handleDeleteProperty]);
 
-  const handleCopyShareLink = useCallback(async (propertyId) => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const link = `${origin}/edit-property/${propertyId}`;
-    try {
-      await navigator.clipboard.writeText(link);
-      showToast("Edit link copied to clipboard!", "success");
-    } catch {
-      window.prompt("Copy this edit link:", link);
-    }
-  }, [showToast]);
-
-  const handleCopyAddPropertyLink = useCallback(async () => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const link = `${origin}/open-addproperty`;
-    try {
-      await navigator.clipboard.writeText(link);
-      showToast("Add-property link copied to clipboard!", "success");
-    } catch {
-      window.prompt("Copy this add-property link:", link);
-    }
-  }, [showToast]);
-
   const handleExport = useCallback(() => {
     try {
+      if (filteredProperties.length === 0) {
+        showToast("Nothing to export", "error");
+        return;
+      }
+
       const exportData = filteredProperties.map((property) => ({
         ID: property.id,
         Title: property.title,
@@ -1864,17 +2009,18 @@ export default function AdminPropertiesPage() {
           headers
             .map((header) => {
               const value = row[header];
-              if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
-                return `"${value.replace(/"/g, '""')}"`;
+              if (value === null || value === undefined) return "";
+              const str = String(value);
+              if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+                return `"${str.replace(/"/g, '""')}"`;
               }
-              return value;
+              return str;
             })
             .join(",")
         ),
       ];
 
-      const csvContent = csvRows.join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
@@ -1903,20 +2049,22 @@ export default function AdminPropertiesPage() {
     setSelectedProperties((prev) => (checked ? [...prev, id] : prev.filter((x) => x !== id)));
   }, []);
 
-  const allFilteredSelected = filteredProperties.length > 0 && selectedProperties.length === filteredProperties.length;
+  const allFilteredSelected =
+    filteredProperties.length > 0 && selectedProperties.length === filteredProperties.length;
+
   const handleToggleSelectAll = useCallback((checked) => {
     setSelectedProperties(checked ? filteredProperties.map((p) => p.id) : []);
   }, [filteredProperties]);
 
-  const stats = useMemo(
-    () => ({
-      total: properties.length,
-      accepted: properties.filter((p) => p.status === "ACCEPTED").length,
-      pending: properties.filter((p) => p.status === "PENDING").length,
-      rejected: properties.filter((p) => p.status === "REJECT" || p.status === "REJECTED").length,
-    }),
-    [properties]
-  );
+  const stats = useMemo(() => {
+    const source = Array.isArray(properties) ? properties : [];
+    return {
+      total: source.length,
+      accepted: source.filter((p) => p?.status === "ACCEPTED").length,
+      pending: source.filter((p) => p?.status === "PENDING").length,
+      rejected: source.filter((p) => p?.status === "REJECT" || p?.status === "REJECTED").length,
+    };
+  }, [properties]);
 
   if (loading) {
     return (
@@ -1941,7 +2089,7 @@ export default function AdminPropertiesPage() {
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 50 }}
-              className={`fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
+              className={`fixed bottom-4 right-4 z-[70] px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
                 toastMessage.type === "success" ? "bg-green-500" : "bg-red-500"
               } text-white`}
             >
@@ -1962,7 +2110,7 @@ export default function AdminPropertiesPage() {
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={handleCopyAddPropertyLink} className="gap-2" title="Copy a shareable, no-login link to add a new property">
-                <Share2 className="h-4 w-4" />
+                <Link2 className="h-4 w-4" />
                 Share Add-Property Link
               </Button>
               <Button onClick={handleAddProperty} className="bg-gradient-to-r from-primary to-primary/70 hover:shadow-lg transition-all">
@@ -2089,10 +2237,7 @@ export default function AdminPropertiesPage() {
           )}
         </AnimatePresence>
 
-        {/* Properties Table — every filtered property is rendered, no windowing
-            or "Load More" cap. At normal admin-list sizes (tens to a couple
-            hundred rows) this is plenty fast on its own; the memoized
-            PropertyRow below is what keeps typing/status-change snappy. */}
+        {/* Properties Table */}
         <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
           {error ? (
             <div className="p-8 text-center">
@@ -2137,9 +2282,11 @@ export default function AdminPropertiesPage() {
                       onToggleSelect={handleToggleSelect}
                       onView={handleViewProperty}
                       onEdit={handleEditProperty}
-                      onCopyLink={handleCopyShareLink}
+                      onCopyLink={handleCopyEditLink}
                       onDelete={handleDeleteProperty}
                       onStatusChange={handleStatusChange}
+                      onShareWhatsApp={handleShareWhatsApp}
+                      onShareCopyLink={handleShareCopyLink}
                     />
                   ))}
                 </tbody>
@@ -2151,7 +2298,7 @@ export default function AdminPropertiesPage() {
           <div className="px-6 py-4 border-t bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-500">
               Showing all {filteredProperties.length} properties
-              {filteredProperties.length !== properties.length && ` (filtered from ${properties.length})`}
+              {filteredProperties.length !== stats.total && ` (filtered from ${stats.total})`}
             </p>
             {filteredProperties.length > 0 && (
               <p className="text-sm text-green-600">

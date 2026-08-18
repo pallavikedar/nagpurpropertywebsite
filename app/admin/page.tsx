@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20,7 +19,6 @@ import {
   Mail,
   Phone,
   MessageSquare,
-  CalendarDays,
 } from "lucide-react";
 import {
   PieChart,
@@ -43,11 +41,32 @@ import AdminSidebar from "@/components/admin-sidebar";
 
 const COLORS = ["#4690be", "#16a34a", "#f59e0b", "#dc2626"];
 
+/**
+ * Normalizes any API response shape into a plain array.
+ * Handles:
+ *  - bare arrays                 -> [...]
+ *  - Spring Page objects         -> { content: [...], totalElements, ... }
+ *  - common wrapper envelopes    -> { data: [...] }
+ * Anything else returns [] so .filter/.map/.forEach never throw.
+ */
+const toArray = (payload: any): any[] => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.content)) return payload.content; // Spring Page
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
+  return [];
+};
+
+/** Pulls the true total from a Spring Page, falling back to the page length. */
+const totalOf = (payload: any, list: any[]): number =>
+  typeof payload?.totalElements === "number" ? payload.totalElements : list.length;
+
 export default function AdminDashboard() {
   const router = useRouter();
-  const [properties, setProperties] = useState([]);
-  const [enquiries, setEnquiries] = useState([]);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [enquiries, setEnquiries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [chartHeight, setChartHeight] = useState(300);
   const [stats, setStats] = useState({
     totalProperties: 0,
@@ -81,57 +100,84 @@ export default function AdminDashboard() {
     return () => window.removeEventListener("resize", updateChartHeight);
   }, []);
 
-  // Fetch Properties
+  // Fetch Properties + Enquiries together so `loading` flips once, at the end.
   useEffect(() => {
-    const fetchProperties = async () => {
+    let cancelled = false;
+
+    const fetchAll = async () => {
       const token = localStorage.getItem("admintoken");
-      if (!token) return;
-
-      try {
-        const res = await fetch(`${BASE_URL}/properties`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        setProperties(data);
-
-        setStats((prev) => ({
-          ...prev,
-          totalProperties: data.length,
-          accepted: data.filter((p) => p.status === "ACCEPTED").length,
-          pending: data.filter((p) => p.status === "PENDING").length,
-          rejected: data.filter((p) => p.status === "REJECT").length,
-        }));
-      } catch (error) {
-        console.error("Error fetching properties:", error);
-      }
-    };
-    fetchProperties();
-  }, []);
-
-  // Fetch Enquiries
-  useEffect(() => {
-    const fetchEnquiries = async () => {
-      const token = localStorage.getItem("admintoken");
-      if (!token) return;
-
-      try {
-        const res = await fetch(`${BASE_URL}/AllProperty-enquiries`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await res.json();
-        setEnquiries(data);
-        setStats((prev) => ({ ...prev, totalEnquiries: data.length }));
-      } catch (error) {
-        console.error("Error fetching enquiries:", error);
-      } finally {
+      if (!token) {
         setLoading(false);
+        return;
       }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      // --- Properties -------------------------------------------------
+      try {
+        // size=2000 keeps the counts correct now that the endpoint is paginated.
+        // Better long term: a dedicated /properties/stats endpoint on Spring Boot.
+        const res = await fetch(`${BASE_URL}/properties?page=0&size=2000`, { headers });
+
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem("admintoken");
+          router.push("/Login");
+          return;
+        }
+        if (!res.ok) throw new Error(`Properties request failed (${res.status})`);
+
+        const payload = await res.json();
+        const list = toArray(payload);
+
+        if (!cancelled) {
+          setProperties(list);
+          setStats((prev) => ({
+            ...prev,
+            totalProperties: totalOf(payload, list),
+            accepted: list.filter((p) => p?.status === "ACCEPTED").length,
+            pending: list.filter((p) => p?.status === "PENDING").length,
+            rejected: list.filter((p) => p?.status === "REJECT").length,
+          }));
+        }
+      } catch (err) {
+        console.error("Error fetching properties:", err);
+        if (!cancelled) setError("Could not load properties.");
+      }
+
+      // --- Enquiries --------------------------------------------------
+      try {
+        const res = await fetch(`${BASE_URL}/AllProperty-enquiries`, { headers });
+
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem("admintoken");
+          router.push("/Login");
+          return;
+        }
+        if (!res.ok) throw new Error(`Enquiries request failed (${res.status})`);
+
+        const payload = await res.json();
+        const list = toArray(payload);
+
+        if (!cancelled) {
+          setEnquiries(list);
+          setStats((prev) => ({ ...prev, totalEnquiries: totalOf(payload, list) }));
+        }
+      } catch (err) {
+        console.error("Error fetching enquiries:", err);
+        if (!cancelled) setError((e) => e ?? "Could not load enquiries.");
+      }
+
+      if (!cancelled) setLoading(false);
     };
-    fetchEnquiries();
-  }, []);
+
+    fetchAll();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   const propertyStatusData = [
     { name: "Accepted", value: stats.accepted, color: "#16a34a" },
@@ -143,8 +189,15 @@ export default function AdminDashboard() {
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const enquiriesByDay = days.map((day) => ({ day, count: 0 }));
 
-    enquiries.forEach((enquiry) => {
-      const date = new Date(enquiry.createdAt || enquiry.visitDate);
+    const safeEnquiries = Array.isArray(enquiries) ? enquiries : [];
+
+    safeEnquiries.forEach((enquiry) => {
+      const raw = enquiry?.createdAt || enquiry?.visitDate;
+      if (!raw) return;
+
+      const date = new Date(raw);
+      if (isNaN(date.getTime())) return; // skip unparseable dates
+
       const dayName = days[date.getDay() === 0 ? 6 : date.getDay() - 1];
       const dayData = enquiriesByDay.find((d) => d.day === dayName);
       if (dayData) dayData.count++;
@@ -152,6 +205,14 @@ export default function AdminDashboard() {
 
     return enquiriesByDay;
   };
+
+  const formatDate = (value: any) => {
+    if (!value) return "—";
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
+  };
+
+  const recentEnquiries = (Array.isArray(enquiries) ? enquiries : []).slice(0, 5);
 
   const statCards = [
     {
@@ -227,6 +288,13 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Error banner (non-blocking) */}
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {statCards.map((stat, index) => {
@@ -254,7 +322,7 @@ export default function AdminDashboard() {
                     </Badge>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-                    {stat.value.toLocaleString()}
+                    {Number(stat.value || 0).toLocaleString()}
                   </h3>
                   <p className="text-gray-500 text-xs sm:text-sm mt-1">{stat.title}</p>
                 </div>
@@ -287,7 +355,7 @@ export default function AdminDashboard() {
                     outerRadius={chartHeight < 260 ? 75 : 100}
                     paddingAngle={5}
                     dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                   >
                     {propertyStatusData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -351,9 +419,9 @@ export default function AdminDashboard() {
           <CardContent>
             {/* Mobile / small screens: stacked card list */}
             <div className="space-y-3 md:hidden">
-              {enquiries.slice(0, 5).map((enquiry, idx) => (
+              {recentEnquiries.map((enquiry, idx) => (
                 <motion.div
-                  key={idx}
+                  key={enquiry?.id ?? idx}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
@@ -361,23 +429,23 @@ export default function AdminDashboard() {
                 >
                   <div className="flex justify-between items-start gap-2 mb-2">
                     <p className="font-semibold text-gray-900 text-sm break-words min-w-0">
-                      {enquiry.fullName || enquiry.name}
+                      {enquiry?.fullName || enquiry?.name || "—"}
                     </p>
                     <Badge
                       variant="outline"
                       className="bg-blue-50 text-blue-700 border-blue-200 text-xs shrink-0"
                     >
-                      {new Date(enquiry.visitDate || enquiry.createdAt).toLocaleDateString()}
+                      {formatDate(enquiry?.visitDate || enquiry?.createdAt)}
                     </Badge>
                   </div>
                   <div className="space-y-1 text-xs text-gray-600">
                     <p className="flex items-center gap-1.5 break-all">
-                      <Mail className="h-3.5 w-3.5 shrink-0" /> {enquiry.email}
+                      <Mail className="h-3.5 w-3.5 shrink-0" /> {enquiry?.email || "—"}
                     </p>
                     <p className="flex items-center gap-1.5">
-                      <Phone className="h-3.5 w-3.5 shrink-0" /> {enquiry.phone}
+                      <Phone className="h-3.5 w-3.5 shrink-0" /> {enquiry?.phone || "—"}
                     </p>
-                    {enquiry.message && (
+                    {enquiry?.message && (
                       <p className="flex items-start gap-1.5">
                         <MessageSquare className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                         <span className="line-clamp-2">{enquiry.message}</span>
@@ -386,7 +454,7 @@ export default function AdminDashboard() {
                   </div>
                 </motion.div>
               ))}
-              {enquiries.length === 0 && (
+              {recentEnquiries.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-gray-500 text-sm">No enquiries found</p>
                 </div>
@@ -408,29 +476,32 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {enquiries.slice(0, 5).map((enquiry, idx) => (
+                  {recentEnquiries.map((enquiry, idx) => (
                     <motion.tr
-                      key={idx}
+                      key={enquiry?.id ?? idx}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-4 py-3 text-sm font-medium text-gray-900 max-w-[160px] truncate">
-                        {enquiry.fullName || enquiry.name}
+                        {enquiry?.fullName || enquiry?.name || "—"}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 max-w-[200px] truncate">
-                        {enquiry.email}
+                        {enquiry?.email || "—"}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
-                        {enquiry.phone}
+                        {enquiry?.phone || "—"}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate hidden lg:table-cell">
-                        {enquiry.message}
+                        {enquiry?.message}
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 whitespace-nowrap">
-                          {new Date(enquiry.visitDate || enquiry.createdAt).toLocaleDateString()}
+                        <Badge
+                          variant="outline"
+                          className="bg-blue-50 text-blue-700 border-blue-200 whitespace-nowrap"
+                        >
+                          {formatDate(enquiry?.visitDate || enquiry?.createdAt)}
                         </Badge>
                       </td>
                     </motion.tr>
@@ -438,18 +509,18 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
 
-              {enquiries.length === 0 && (
+              {recentEnquiries.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-gray-500">No enquiries found</p>
                 </div>
               )}
             </div>
 
-            {enquiries.length > 0 && (
+            {stats.totalEnquiries > 0 && (
               <div className="mt-6 text-center">
                 <Link href="/admin/propertyEnquiry">
                   <Button variant="outline" className="gap-2 w-full sm:w-auto">
-                    View All Enquiries ({enquiries.length})
+                    View All Enquiries ({stats.totalEnquiries})
                     <Eye className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -469,7 +540,10 @@ export default function AdminDashboard() {
               <h3 className="text-lg sm:text-xl font-semibold mb-2">Add New Property</h3>
               <p className="text-sm opacity-90 mb-4">List a new property on the platform</p>
               <Link href="/add-property">
-                <Button variant="secondary" className="w-full bg-white/20 hover:bg-white/30 text-white border-0">
+                <Button
+                  variant="secondary"
+                  className="w-full bg-white/20 hover:bg-white/30 text-white border-0"
+                >
                   Add Property
                 </Button>
               </Link>
@@ -485,7 +559,10 @@ export default function AdminDashboard() {
               <h3 className="text-lg sm:text-xl font-semibold mb-2">Manage Properties</h3>
               <p className="text-sm opacity-90 mb-4">Review and moderate property listings</p>
               <Link href="/admin/Properties">
-                <Button variant="secondary" className="w-full bg-white/20 hover:bg-white/30 text-white border-0">
+                <Button
+                  variant="secondary"
+                  className="w-full bg-white/20 hover:bg-white/30 text-white border-0"
+                >
                   Manage Properties
                 </Button>
               </Link>
@@ -500,7 +577,10 @@ export default function AdminDashboard() {
               <TrendingUp className="h-8 w-8 sm:h-10 sm:w-10 mb-3 sm:mb-4 opacity-90 group-hover:scale-110 transition-transform" />
               <h3 className="text-lg sm:text-xl font-semibold mb-2">Analytics Report</h3>
               <p className="text-sm opacity-90 mb-4">View detailed analytics and insights</p>
-              <Button variant="secondary" className="w-full bg-white/20 hover:bg-white/30 text-white border-0">
+              <Button
+                variant="secondary"
+                className="w-full bg-white/20 hover:bg-white/30 text-white border-0"
+              >
                 View Reports
               </Button>
             </div>

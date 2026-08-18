@@ -1,16 +1,52 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Bath, Bed, Heart, MapPin, Move, Home, FilterX, SlidersHorizontal } from "lucide-react";
+import {
+  Bath,
+  Bed,
+  Heart,
+  MapPin,
+  Move,
+  Home,
+  FilterX,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { BASE_URL } from "@/app/baseurl";
 
+/* ------------------------------------------------------------------ */
+/* Config                                                              */
+/* ------------------------------------------------------------------ */
+
+const PAGE_SIZE = 6;
+
+/**
+ * Spring's Pageable binds from flat query params, one `sort` entry per rule:
+ *   ?page=0&size=6&sort=id,desc&sort=price,asc
+ * Field names must match the entity property, not the DB column.
+ */
+const SORT: string[] = ["id,desc"];
+
+/**
+ * Flip to `true` once the Spring controller accepts filter params
+ * (propertyFor, city, propertyType, minPrice, maxPrice, bedrooms).
+ * While `false`, filtering only applies to the page currently on screen.
+ */
+const FILTER_ON_SERVER = false;
+
+const FAVORITES_KEY = "favorites";
+
+/* ------------------------------------------------------------------ */
+/* Types                                                               */
+/* ------------------------------------------------------------------ */
+
 interface Property {
-  id: string;
+  id: number | string;
   title: string;
   address: string;
   locality?: string;
@@ -20,250 +56,471 @@ interface Property {
   propertyType?: string;
   type?: "rent" | "sale";
   price: number;
-  bedrooms: number;
-  bathrooms: number;
-  area: number;
-  ownerName: string;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  area?: number | null;
+  buildUpArea?: string | null;
+  carpetArea?: string | null;
+  ownerName?: string;
   createdAt?: string;
   description?: string;
 }
 
-export default function PropertyCard({ filters = null, searchTrigger = 0 }) {
-  const [allProperties, setAllProperties] = useState<Property[]>([]);
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-  const [error, setError] = useState("");
+interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+  numberOfElements: number;
+  empty: boolean;
+}
+
+interface SearchFilters {
+  purpose?: string;
+  location?: string;
+  propertyType?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  bedrooms?: string;
+}
+
+interface PropertyCardProps {
+  filters?: SearchFilters | null;
+  searchTrigger?: number;
+}
+
+/* ------------------------------------------------------------------ */
+/* Helpers                                                             */
+/* ------------------------------------------------------------------ */
+
+const emptyPage: PageResponse<Property> = {
+  content: [],
+  totalElements: 0,
+  totalPages: 0,
+  number: 0,
+  size: PAGE_SIZE,
+  first: true,
+  last: true,
+  numberOfElements: 0,
+  empty: true,
+};
+
+/** Accepts either the Spring Page object or a bare array (older endpoint). */
+function normalizePage(data: unknown): PageResponse<Property> {
+  if (Array.isArray(data)) {
+    return {
+      ...emptyPage,
+      content: data as Property[],
+      totalElements: data.length,
+      totalPages: 1,
+      numberOfElements: data.length,
+      empty: data.length === 0,
+    };
+  }
+
+  const page = (data ?? {}) as Partial<PageResponse<Property>>;
+  const content = Array.isArray(page.content) ? page.content : [];
+
+  return {
+    content,
+    totalElements: page.totalElements ?? content.length,
+    totalPages: page.totalPages ?? 1,
+    number: page.number ?? 0,
+    size: page.size ?? PAGE_SIZE,
+    first: page.first ?? true,
+    last: page.last ?? true,
+    numberOfElements: page.numberOfElements ?? content.length,
+    empty: page.empty ?? content.length === 0,
+  };
+}
+
+function buildUrl(page: number, filters?: SearchFilters | null) {
+  const params = new URLSearchParams({
+    page: String(page),
+    size: String(PAGE_SIZE),
+  });
+
+  SORT.forEach((rule) => params.append("sort", rule));
+
+  if (FILTER_ON_SERVER && filters) {
+    if (filters.purpose && filters.purpose !== "all")
+      params.set("propertyFor", filters.purpose);
+    if (filters.location?.trim()) params.set("city", filters.location.trim());
+    if (filters.propertyType && filters.propertyType !== "all")
+      params.set("propertyType", filters.propertyType);
+    if (filters.minPrice != null) params.set("minPrice", String(filters.minPrice));
+    if (filters.maxPrice != null) params.set("maxPrice", String(filters.maxPrice));
+    if (filters.bedrooms && filters.bedrooms !== "any")
+      params.set("bedrooms", filters.bedrooms);
+  }
+
+  return `${BASE_URL}/properties/accepted?${params.toString()}`;
+}
+
+/** Page numbers to render, with -1 marking a gap. e.g. [0, -1, 4, 5, 6, -1, 9] */
+function buildPageWindow(current: number, total: number): number[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+
+  const pages = new Set<number>([0, total - 1, current]);
+  if (current - 1 > 0) pages.add(current - 1);
+  if (current + 1 < total - 1) pages.add(current + 1);
+  if (current <= 2) pages.add(1).add(2).add(3);
+  if (current >= total - 3) pages.add(total - 2).add(total - 3).add(total - 4);
+
+  const sorted = [...pages].filter((p) => p >= 0 && p < total).sort((a, b) => a - b);
+
+  const withGaps: number[] = [];
+  sorted.forEach((page, i) => {
+    if (i > 0 && page - sorted[i - 1] > 1) withGaps.push(-1);
+    withGaps.push(page);
+  });
+  return withGaps;
+}
+
+/** True only if at least one field would actually narrow the results. */
+function hasRealFilters(f?: SearchFilters | null): boolean {
+  if (!f) return false;
+  return Boolean(
+    (f.purpose && f.purpose !== "all") ||
+      f.location?.trim() ||
+      (f.propertyType && f.propertyType !== "all") ||
+      f.minPrice != null ||
+      f.maxPrice != null ||
+      (f.bedrooms && f.bedrooms !== "any")
+  );
+}
+
+function formatPrice(price: number) {
+  if (price >= 10000000) return `₹${(price / 10000000).toFixed(2)}Cr`;
+  if (price >= 100000) return `₹${(price / 100000).toFixed(2)}L`;
+  return `₹${price.toLocaleString("en-IN")}`;
+}
+
+function formatArea(property: Property) {
+  const value = property.area ?? property.buildUpArea ?? property.carpetArea;
+  if (value === null || value === undefined || value === "") return "—";
+  return `${value} sq.ft`;
+}
+
+function isRent(property: Property) {
+  return (
+    property.propertyFor?.toLowerCase() === "rent" ||
+    property.type?.toLowerCase() === "rent"
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Component                                                           */
+/* ------------------------------------------------------------------ */
+
+export default function PropertyCard({
+  filters = null,
+  searchTrigger = 0,
+}: PropertyCardProps) {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<SearchFilters | null>(null);
 
-  // Fetch properties
-  useEffect(() => {
-    const fetchProperties = async () => {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const requestIdRef = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
+
+  /* ---------------- Load a page ---------------- */
+
+  const loadPage = useCallback(
+    async (pageNumber: number, currentFilters?: SearchFilters | null) => {
+      const requestId = ++requestIdRef.current;
+
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      setLoading(true);
+      setError("");
+
       try {
-        const cachedData = localStorage.getItem("properties");
-        if (cachedData) {
-          const parsed = JSON.parse(cachedData);
-          setAllProperties(parsed);
-          setFilteredProperties(parsed);
-          setLoading(false);
-        }
-
-        const savedFavorites = localStorage.getItem("favorites");
-        if (savedFavorites) {
-          setFavorites(JSON.parse(savedFavorites));
-        }
-
-        const response = await fetch(`${BASE_URL}/properties/accepted`, {
+        const response = await fetch(buildUrl(pageNumber, currentFilters), {
           method: "GET",
+          signal: controller.signal,
         });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch properties");
+          throw new Error(`Couldn't load properties (${response.status})`);
         }
 
-        const data = await response.json();
-        setAllProperties(data);
-        setFilteredProperties(data);
-        localStorage.setItem("properties", JSON.stringify(data));
-      } catch (err: any) {
-        setError(err.message || "Something went wrong");
+        const pageData = normalizePage(await response.json());
+
+        // A newer request already went out — discard this result.
+        if (requestId !== requestIdRef.current) return;
+
+        setProperties(pageData.content);
+        setPage(pageData.number);
+        setTotalPages(pageData.totalPages);
+        setTotalElements(pageData.totalElements);
+
+        // Page shrank under us (deleted listings) — step back to the last page.
+        if (pageData.empty && pageData.totalPages > 0 && pageNumber > pageData.totalPages - 1) {
+          loadPage(pageData.totalPages - 1, currentFilters);
+        }
+      } catch (err) {
+        if ((err as Error).name === "AbortError") return;
+        if (requestId !== requestIdRef.current) return;
+        setError((err as Error).message || "Something went wrong");
       } finally {
-        setLoading(false);
+        if (requestId === requestIdRef.current) setLoading(false);
       }
-    };
+    },
+    []
+  );
 
-    fetchProperties();
-  }, []);
+  /* ---------------- Initial load ---------------- */
 
-  // Apply filters when searchTrigger changes or filters update
   useEffect(() => {
-    if (searchTrigger > 0 && filters) {
-      applyFilters(filters);
-    }
-  }, [searchTrigger, filters]);
-
-  const applyFilters = (searchFilters) => {
-    let filtered = [...allProperties];
-
-    // Filter by purpose (buy/rent)
-    if (searchFilters.purpose && searchFilters.purpose !== "all") {
-      filtered = filtered.filter(property => 
-        property.propertyFor?.toLowerCase() === searchFilters.purpose.toLowerCase() ||
-        property.type?.toLowerCase() === searchFilters.purpose.toLowerCase()
-      );
-    }
-
-    // Filter by location
-    if (searchFilters.location && searchFilters.location.trim()) {
-      const searchTerm = searchFilters.location.toLowerCase();
-      filtered = filtered.filter(property => 
-        property.title?.toLowerCase().includes(searchTerm) ||
-        property.address?.toLowerCase().includes(searchTerm) ||
-        property.locality?.toLowerCase().includes(searchTerm) ||
-        property.city?.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    // Filter by property type
-    if (searchFilters.propertyType && searchFilters.propertyType !== "all") {
-      filtered = filtered.filter(property => 
-        property.propertyType?.toLowerCase() === searchFilters.propertyType.toLowerCase()
-      );
-    }
-
-    // Filter by price range
-    if (searchFilters.minPrice && searchFilters.maxPrice) {
-      filtered = filtered.filter(property => 
-        property.price >= searchFilters.minPrice && 
-        property.price <= searchFilters.maxPrice
-      );
-    }
-
-    // Filter by bedrooms
-    if (searchFilters.bedrooms && searchFilters.bedrooms !== "any") {
-      const bedroomCount = parseInt(searchFilters.bedrooms);
-      if (bedroomCount === 4) {
-        filtered = filtered.filter(property => property.bedrooms >= 4);
-      } else {
-        filtered = filtered.filter(property => property.bedrooms === bedroomCount);
+    try {
+      const savedFavorites = localStorage.getItem(FAVORITES_KEY);
+      if (savedFavorites) {
+        const parsed = JSON.parse(savedFavorites);
+        if (Array.isArray(parsed)) setFavorites(parsed.map(String));
       }
+    } catch {
+      /* ignore malformed favorites */
     }
 
-    setFilteredProperties(filtered);
+    loadPage(0, null);
+  }, [loadPage]);
+
+  /* ---------------- Re-run on search ---------------- */
+
+  useEffect(() => {
+    if (searchTrigger === 0) return;
+    const next = hasRealFilters(filters) ? filters : null;
+    setActiveFilters(next);
+    if (FILTER_ON_SERVER) loadPage(0, next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTrigger]);
+
+  /* ---------------- Client-side filtering fallback ---------------- */
+
+  const visibleProperties = useMemo(() => {
+    if (FILTER_ON_SERVER || !activeFilters) return properties;
+
+    return properties.filter((property) => {
+      const f = activeFilters;
+
+      if (f.purpose && f.purpose !== "all") {
+        const purpose = f.purpose.toLowerCase();
+        const matches =
+          property.propertyFor?.toLowerCase() === purpose ||
+          property.type?.toLowerCase() === purpose;
+        if (!matches) return false;
+      }
+
+      if (f.location?.trim()) {
+        const term = f.location.toLowerCase();
+        const haystack = [property.title, property.address, property.locality, property.city]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(term)) return false;
+      }
+
+      if (f.propertyType && f.propertyType !== "all") {
+        if (property.propertyType?.toLowerCase() !== f.propertyType.toLowerCase())
+          return false;
+      }
+
+      if (f.minPrice != null && property.price < f.minPrice) return false;
+      if (f.maxPrice != null && property.price > f.maxPrice) return false;
+
+      if (f.bedrooms && f.bedrooms !== "any") {
+        const wanted = parseInt(f.bedrooms, 10);
+        const beds = property.bedrooms ?? 0;
+        if (wanted >= 4 ? beds < 4 : beds !== wanted) return false;
+      }
+
+      return true;
+    });
+  }, [properties, activeFilters]);
+
+  const hasActiveFilters = activeFilters !== null;
+
+  // Remove once the count is confirmed correct.
+  if (process.env.NODE_ENV === "development") {
+    console.log("[PropertyCard]", {
+      fetched: properties.length,
+      afterFilter: visibleProperties.length,
+      totalElements,
+      totalPages,
+      activeFilters,
+    });
+  }
+  const rangeStart = totalElements === 0 ? 0 : page * PAGE_SIZE + 1;
+  const rangeEnd = page * PAGE_SIZE + properties.length;
+
+  /* ---------------- Actions ---------------- */
+
+  const goToPage = (next: number) => {
+    if (loading || next === page || next < 0 || next > totalPages - 1) return;
+    loadPage(next, activeFilters);
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const clearFilters = () => {
-    setFilteredProperties(allProperties);
-    if (window.scrollTo) {
-      window.scrollTo({ top: document.querySelector('#properties-section')?.offsetTop - 100, behavior: 'smooth' });
-    }
+    setActiveFilters(null);
+    loadPage(0, null);
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const toggleFavorite = (propertyId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    const newFavorites = favorites.includes(propertyId)
-      ? favorites.filter(id => id !== propertyId)
-      : [...favorites, propertyId];
-    
-    setFavorites(newFavorites);
-    localStorage.setItem("favorites", JSON.stringify(newFavorites));
+
+    setFavorites((prev) => {
+      const next = prev.includes(propertyId)
+        ? prev.filter((id) => id !== propertyId)
+        : [...prev, propertyId];
+      try {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
   };
 
-  const formatPrice = (price: number, type: string) => {
-    if (price >= 10000000) {
-      return `₹${(price / 10000000).toFixed(1)}Cr`;
-    } else if (price >= 100000) {
-      return `₹${(price / 100000).toFixed(1)}L`;
-    }
-    return `₹${price.toLocaleString()}`;
-  };
+  /* ---------------- Error state ---------------- */
 
-  if (loading) {
-    return (
-      <div className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="animate-pulse">
-            <div className="bg-gray-200 rounded-lg h-48 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
+  if (error && properties.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="text-red-500 text-lg font-semibold mb-2">Error</div>
+          <div className="text-red-500 text-lg font-semibold mb-2">
+            Properties didn&apos;t load
+          </div>
           <p className="text-gray-600">{error}</p>
-          <Button onClick={() => window.location.reload()} className="mt-4" variant="outline">
-            Try Again
+          <Button onClick={() => loadPage(page, activeFilters)} className="mt-4" variant="outline">
+            Try again
           </Button>
         </div>
       </div>
     );
   }
 
+  /* ---------------- Render ---------------- */
+
   return (
-    <div className="container mx-auto px-4 py-8" id="properties-section">
-      {/* Results Header */}
+    <div className="container mx-auto px-4 py-8" id="properties-section" ref={sectionRef}>
+      {/* Results header */}
       <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        
-        
-        {filteredProperties.length !== allProperties.length && (
-          <Button 
-            variant="outline" 
-            onClick={clearFilters}
-            className="flex items-center gap-2"
-          >
+        <p className="text-sm text-gray-600">
+          {loading && properties.length === 0 ? (
+            "Loading properties…"
+          ) : (
+            <>
+              Showing{" "}
+              <span className="font-semibold text-gray-900">
+                {rangeStart}–{rangeEnd}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-gray-900">{totalElements}</span>{" "}
+              {totalElements === 1 ? "property" : "properties"}
+            </>
+          )}
+        </p>
+
+        {hasActiveFilters && (
+          <Button variant="outline" onClick={clearFilters} className="flex items-center gap-2">
             <FilterX className="w-4 h-4" />
-            Clear All Filters
+            Clear all filters
           </Button>
         )}
       </div>
 
-      {/* No Results */}
-      {filteredProperties.length === 0 ? (
+      {loading ? (
+        /* Skeletons */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(PAGE_SIZE)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="bg-gray-200 rounded-lg h-48 mb-4" />
+              <div className="h-4 bg-gray-200 rounded mb-2" />
+              <div className="h-4 bg-gray-200 rounded w-2/3" />
+            </div>
+          ))}
+        </div>
+      ) : visibleProperties.length === 0 ? (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center max-w-md">
             <Home className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No Properties Found</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No properties match this search
+            </h3>
             <p className="text-gray-500 mb-4">
-              We couldn't find any properties matching your search criteria. Try adjusting your filters or browse all properties.
+              Widen the price range or change the location to see more listings.
             </p>
             <Button onClick={clearFilters} variant="outline">
-              View All Properties
+              View all properties
             </Button>
           </div>
         </div>
       ) : (
-        <>
-          {/* Properties Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProperties.map((property, index) => (
-              <Link href={`/properties/${property.id}`} key={property.id}>
-                <div
-                  className="group relative bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
-                >
-                  {/* Image Container */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {visibleProperties.map((property, index) => {
+            const id = String(property.id);
+            const rent = isRent(property);
+
+            return (
+              <Link href={`/properties/${id}`} key={id}>
+                <div className="group relative bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+                  {/* Image */}
                   <div className="relative h-56 overflow-hidden bg-gray-100">
                     <Image
                       src={
-                        property.images && property.images.length > 0
+                        property.images?.length
                           ? property.images[0]
                           : "/api/placeholder/400/300"
                       }
                       alt={property.title}
                       fill
+                      priority={index < 4}
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     />
-                    
+
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
+
                     <Badge
                       className={cn(
                         "absolute top-3 left-3 z-10 px-3 py-1 text-xs font-semibold",
-                        property.propertyFor === "rent" || property.type === "rent"
+                        rent
                           ? "bg-blue-500 hover:bg-blue-600"
                           : "bg-green-500 hover:bg-green-600"
                       )}
                     >
-                      {property.propertyFor === "rent" || property.type === "rent" ? "For Rent" : "For Sell"}
+                      {rent ? "For Rent" : "For Sale"}
                     </Badge>
 
                     <button
-                      onClick={(e) => toggleFavorite(property.id, e)}
+                      type="button"
+                      aria-label={
+                        favorites.includes(id) ? "Remove from saved" : "Save this property"
+                      }
+                      onClick={(e) => toggleFavorite(id, e)}
                       className="absolute top-3 right-3 z-10 p-2 bg-white/90 hover:bg-white rounded-full transition-all duration-200 hover:scale-110"
                     >
                       <Heart
                         className={cn(
                           "h-5 w-5 transition-colors",
-                          favorites.includes(property.id)
+                          favorites.includes(id)
                             ? "fill-red-500 text-red-500"
                             : "text-gray-600"
                         )}
@@ -273,16 +530,14 @@ export default function PropertyCard({ filters = null, searchTrigger = 0 }) {
                     <div className="absolute bottom-3 left-3 z-10 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5">
                       <div className="flex items-baseline gap-1">
                         <span className="text-white font-bold text-lg">
-                          {formatPrice(property.price, property.propertyFor || property.type)}
+                          {formatPrice(property.price)}
                         </span>
-                        {(property.propertyFor === "rent" || property.type === "rent") && (
-                          <span className="text-white/80 text-xs">/month</span>
-                        )}
+                        {rent && <span className="text-white/80 text-xs">/month</span>}
                       </div>
                     </div>
                   </div>
 
-                  {/* Content Container */}
+                  {/* Content */}
                   <div className="p-5">
                     <div className="mb-3">
                       <h3 className="font-bold text-gray-900 text-lg mb-1 line-clamp-1 group-hover:text-primary transition-colors">
@@ -298,20 +553,22 @@ export default function PropertyCard({ filters = null, searchTrigger = 0 }) {
                       <div className="flex items-center gap-1.5">
                         <Bed className="h-4 w-4 text-gray-400" />
                         <span className="text-sm text-gray-700">
-                          {property.bedrooms} {property.bedrooms === 1 ? "Bed" : "Beds"}
+                          {property.bedrooms ?? 0}{" "}
+                          {property.bedrooms === 1 ? "Bed" : "Beds"}
                         </span>
                       </div>
                       <div className="w-px h-4 bg-gray-200" />
                       <div className="flex items-center gap-1.5">
                         <Bath className="h-4 w-4 text-gray-400" />
                         <span className="text-sm text-gray-700">
-                          {property.bathrooms} {property.bathrooms === 1 ? "Bath" : "Baths"}
+                          {property.bathrooms ?? 0}{" "}
+                          {property.bathrooms === 1 ? "Bath" : "Baths"}
                         </span>
                       </div>
                       <div className="w-px h-4 bg-gray-200" />
                       <div className="flex items-center gap-1.5">
                         <Move className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-700">{property.area} sq.ft</span>
+                        <span className="text-sm text-gray-700">{formatArea(property)}</span>
                       </div>
                     </div>
 
@@ -319,35 +576,84 @@ export default function PropertyCard({ filters = null, searchTrigger = 0 }) {
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                           <span className="text-primary font-semibold text-xs">
-                            {property.ownerName?.charAt(0).toUpperCase()}
+                            {property.ownerName?.charAt(0).toUpperCase() ?? "?"}
                           </span>
                         </div>
                         <span className="text-xs text-gray-600 line-clamp-1">
-                          {property.ownerName}
+                          {property.ownerName ?? "Owner"}
                         </span>
                       </div>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                       >
-                        View Details
+                        View details
                       </Button>
                     </div>
                   </div>
                 </div>
               </Link>
-            ))}
+            );
+          })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <nav
+          aria-label="Property pages"
+          className="mt-12 flex flex-col items-center gap-3"
+        >
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Previous page"
+              disabled={page === 0 || loading}
+              onClick={() => goToPage(page - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            {buildPageWindow(page, totalPages).map((p, i) =>
+              p === -1 ? (
+                <span key={`gap-${i}`} className="px-2 text-gray-400 select-none">
+                  …
+                </span>
+              ) : (
+                <Button
+                  key={p}
+                  variant={p === page ? "default" : "outline"}
+                  size="icon"
+                  aria-label={`Page ${p + 1}`}
+                  aria-current={p === page ? "page" : undefined}
+                  disabled={loading}
+                  onClick={() => goToPage(p)}
+                  className={cn(
+                    "min-w-[2.5rem]",
+                    p === page && "bg-primary hover:bg-primary/90 text-white"
+                  )}
+                >
+                  {p + 1}
+                </Button>
+              )
+            )}
+
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Next page"
+              disabled={page >= totalPages - 1 || loading}
+              onClick={() => goToPage(page + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
 
-          {/* Load More Button */}
-          {filteredProperties.length >= 8 && (
-            <div className="text-center mt-12">
-              <Button variant="outline" size="lg" className="px-8">
-                Load More Properties
-              </Button>
-            </div>
-          )}
-        </>
+          <p className="text-xs text-gray-400">
+            Page {page + 1} of {totalPages}
+          </p>
+        </nav>
       )}
     </div>
   );
