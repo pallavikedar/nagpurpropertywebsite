@@ -114,7 +114,7 @@ export default function AdminPropertyViewPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to delete property.");
-      router.push("/admin/properties");
+      router.push("/admin/Properties");
     } catch (err) {
       alert(err.message || "Something went wrong.");
     }
