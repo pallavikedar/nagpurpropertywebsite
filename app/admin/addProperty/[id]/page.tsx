@@ -2242,7 +2242,7 @@ export default function UpdatePropertyPage() {
                           <div><Label className="font-medium mb-2 block">Document Basis <span className="text-red-500">*</span></Label>
                             <Select value={formData.plotType} onValueChange={(v) => handleSelect("plotType", v)}>
                               <SelectTrigger className={errCls("plotType")}><SelectValue placeholder="RL / Registry" /></SelectTrigger>
-                              <SelectContent><SelectItem value="RL">RL (Ready Layout)</SelectItem><SelectItem value="Registry">Registry</SelectItem></SelectContent>
+                              <SelectContent><SelectItem value="RL">RL (Ready Layout)</SelectItem><SelectItem value="REGISTRY">Registry</SelectItem></SelectContent>
                             </Select><FieldError name="plotType" /></div>
                         )}
                         {f?.facing && (
